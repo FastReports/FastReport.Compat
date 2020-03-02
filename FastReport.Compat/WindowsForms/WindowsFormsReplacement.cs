@@ -743,8 +743,8 @@ namespace System.Windows.Forms
         public int ReshowDelay;
         public bool ShowAlways;
 
-        internal void SetToolTip(Control c, string newToolTipText) { }
-        internal string GetToolTip(Control c) { return ""; }
+        public void SetToolTip(Control c, string newToolTipText) { }
+        public string GetToolTip(Control c) { return ""; }
     }
 
     public class ButtonBase : Control
@@ -904,7 +904,7 @@ namespace System.Windows.Forms
         public bool WordWrap;
         public BorderStyle BorderStyle;
 
-        internal void SelectAll() { }
+        public void SelectAll() { }
     }
 
     public class Form : Control
@@ -958,7 +958,7 @@ namespace System.Windows.Forms
         }
     }
 
-    internal class SystemInformation
+    public class SystemInformation
     {
         public static bool HighContrast;
     }
