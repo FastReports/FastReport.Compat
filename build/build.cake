@@ -97,9 +97,9 @@ Task(Default)
 
 #endregion Prepare
 
-#region Core 
+#region Compat
 
-Task("Core")
+Task("Compat")
   .IsDependentOn(Prepare)
   .IsDependentOn(PrepareNuget)
   .Does(() =>
@@ -166,7 +166,7 @@ Task("Core")
 
   });
 
-#endregion Core 
+#endregion Compat 
 
 // Task("setup-connectors-temporal-task")
 //   .IsDependentOn("Prepare")
