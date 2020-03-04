@@ -1,3 +1,4 @@
+#if NETSTANDARD2_0 || NETSTANDARD2_1
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
 // "Software"), to deal in the Software without restriction, including
@@ -48,7 +49,7 @@ namespace System.Windows.Forms
 
     IList GetListFromEnumerable(IEnumerable enumerable)
     {
-      IList l = null;
+      IList l;
 
       IEnumerator e = enumerable.GetEnumerator();
 
@@ -142,3 +143,4 @@ namespace System.Windows.Forms
     }
   }
 }
+#endif

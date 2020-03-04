@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿#if NETSTANDARD2_0 || NETSTANDARD2_1 || NETCOREAPP
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
 using System;
@@ -80,3 +81,4 @@ namespace Microsoft.CSharp
 
     }
 }
+#endif

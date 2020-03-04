@@ -6,7 +6,9 @@ using System.Globalization;
 using System.IO;
 using System.Collections.Specialized;
 using System.Text;
+#if !NET40
 using FastReport.TypeConverters;
+#endif
 
 namespace FastReport.Utils
 {
