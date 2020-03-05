@@ -1,3 +1,5 @@
+#if NETSTANDARD2_0 || NETSTANDARD2_1
+
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -11,7 +13,7 @@ using FastReport.Utils;
 
 namespace System.Windows.Forms
 {
-    #region Enums
+#region Enums
     [Flags]
     public enum Keys
     {
@@ -530,7 +532,7 @@ namespace System.Windows.Forms
             return base.ConvertTo(context, culture, value, destinationType);
         }
     }
-    #endregion
+#endregion
 
 
     public class KeyEventArgs : EventArgs
@@ -972,3 +974,5 @@ namespace System.Windows.Forms
 
 #pragma warning restore FR0000 // Field must be texted in lowerCamelCase.
 #pragma warning restore 1591
+
+#endif
