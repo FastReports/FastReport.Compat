@@ -10,7 +10,7 @@ using System.Text;
 
 namespace Microsoft.VisualBasic
 {
-    internal class VBCodeProvider : CodeDomProvider
+    public class VBCodeProvider : CodeDomProvider
     {
         
 

@@ -5,9 +5,9 @@ using System.Text;
 
 namespace System.CodeDom.Compiler
 {
-    internal class CodeGenerator
+    public class CodeGenerator
     {
-        internal static bool IsValidLanguageIndependentIdentifier(string value)
+        public static bool IsValidLanguageIndependentIdentifier(string value)
         {
             //TODO o_0 what????
             return true;

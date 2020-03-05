@@ -952,7 +952,7 @@ namespace System.Windows.Forms
     }
 
 
-    internal sealed class Application
+    public sealed class Application
     {
         public static void DoEvents()
         {

@@ -6,11 +6,11 @@ using System.Text;
 
 namespace System.CodeDom.Compiler
 {
-    internal class CompilerParameters
+    public class CompilerParameters
     {
-        public bool GenerateInMemory { get; internal set; }
+        public bool GenerateInMemory { get; set; }
         public StringCollection ReferencedAssemblies { get; internal set; } = new StringCollection();
-        public TempFileCollection TempFiles { get; internal set; } = new TempFileCollection("", false);
+        public TempFileCollection TempFiles { get; set; } = new TempFileCollection("", false);
     }
 }
 
