@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace System.CodeDom.Compiler
 {
-    internal abstract class CodeDomProvider : IDisposable
+    public abstract class CodeDomProvider : IDisposable
     {
         static Dictionary<string, string> cache = new Dictionary<string, string>();
 
@@ -31,7 +31,7 @@ namespace System.CodeDom.Compiler
         }
 
 
-        internal MetadataReference GetReference(string refDll)
+        public MetadataReference GetReference(string refDll)
         {
             string reference = refDll;
             try

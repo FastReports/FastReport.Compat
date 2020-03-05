@@ -29,7 +29,7 @@ using System.Collections;
 
 namespace System.Windows.Forms
 {
-  internal class BindingSource : Component
+  public class BindingSource : Component
   {
     IList list;
     object datasource;

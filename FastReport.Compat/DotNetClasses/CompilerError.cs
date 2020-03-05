@@ -5,7 +5,7 @@ using System.Text;
 
 namespace System.CodeDom.Compiler
 {
-    internal class CompilerError
+    public class CompilerError
     {
         public int Line { get; internal set; }
         public object Column { get; internal set; }

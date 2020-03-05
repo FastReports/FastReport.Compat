@@ -13,7 +13,7 @@ using System.Text;
 
 namespace Microsoft.CSharp
 {
-    internal class CSharpCodeProvider : CodeDomProvider
+    public class CSharpCodeProvider : CodeDomProvider
     {
 
 

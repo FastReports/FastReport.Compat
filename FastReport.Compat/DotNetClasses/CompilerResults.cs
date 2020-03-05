@@ -6,7 +6,7 @@ using System.Text;
 
 namespace System.CodeDom.Compiler
 {
-    internal class CompilerResults
+    public class CompilerResults
     {
         public List<CompilerError> Errors { get; internal set; } = new List<CompilerError>();
         public Assembly CompiledAssembly { get; internal set; } = null;

@@ -1,10 +1,12 @@
-﻿using System;
+﻿#if NETSTANDARD2_0 || NETSTANDARD2_1 || NETCOREAPP
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace System.CodeDom.Compiler
 {
-    internal class TempFileCollection
+    public class TempFileCollection
     {
         public string tempFolder;
         public bool v;
@@ -16,3 +18,5 @@ namespace System.CodeDom.Compiler
         }
     }
 }
+
+#endif

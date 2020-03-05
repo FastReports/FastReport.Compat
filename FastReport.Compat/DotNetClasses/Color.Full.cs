@@ -4,7 +4,7 @@ using System.Text;
 #if !(NETSTANDARD2_0 || NETSTANDARD2_1)
 namespace System.Drawing
 {
-    internal class ColorExt
+    public class ColorExt
     {
         public static bool IsKnownColor(Color color)
         {

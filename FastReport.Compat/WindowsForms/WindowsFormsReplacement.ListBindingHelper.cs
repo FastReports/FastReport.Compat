@@ -36,7 +36,7 @@ using System.Collections.Generic;
 namespace System.Windows.Forms
 {
 
-  internal static class ListBindingHelper
+  public static class ListBindingHelper
   {
     public static object GetList(object list)
     {
