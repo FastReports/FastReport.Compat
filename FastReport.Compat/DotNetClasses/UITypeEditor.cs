@@ -1,6 +1,6 @@
 ﻿namespace System.Drawing.Design
 {
-    class UITypeEditor
+    public class UITypeEditor
     {
 
     }
