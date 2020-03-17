@@ -6,7 +6,7 @@ using System.Net;
 
 namespace FastReport.Utils
 {
-    internal static class ImageHelper
+    public static class ImageHelper
     {
         public static Bitmap CloneBitmap(Image source)
         {
