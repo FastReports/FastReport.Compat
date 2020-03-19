@@ -1,7 +1,15 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project>
 
+  <PropertyGroup Condition="'$(TargetFramework)'=='netcoreapp3.0' OR '$(TargetFramework)'=='netcoreapp3.1' OR '$(TargetFramework)'=='netcoreapp5.0'">
+    <IsNetCoreWin>true</IsNetCoreWin>
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+
+  <Sdk Name="Microsoft.NET.Sdk" Condition="!$(IsNetCoreWin)" />
+  <Sdk Name="Microsoft.NET.Sdk.WindowsDesktop" Condition="$(IsNetCoreWin)" />
+    
   <PropertyGroup>
-    <TargetFrameworks>net40;netstandard2.0;netstandard2.1;netcoreapp3.0;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>net40;netstandard2.0;netstandard2.1;netcoreapp3.0;netcoreapp3.1;$(CustomTargetFrameworks)</TargetFrameworks>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>FastReport.OpenSource.snk</AssemblyOriginatorKeyFile>
     <Authors>Fast Reports Inc.</Authors>
@@ -22,10 +30,6 @@
     <PackageReference Include="System.Drawing.Common" Version="[4.6.1,)" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="[2.0.0,)" />
     <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="[2.0.0,)" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)'=='netcoreapp3.0' OR '$(TargetFramework)'=='netcoreapp3.1'">
-    <PackageReference Include="System.Windows.Extensions" Version="4.6.0" />
   </ItemGroup>
 
   <ItemGroup>
