@@ -1,14 +1,16 @@
 ﻿#if NETSTANDARD2_0 || NETSTANDARD2_1 || NETCOREAPP
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.VisualBasic;
 using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using FastReport.Code.CodeDom.Compiler;
 
-namespace Microsoft.VisualBasic
+
+namespace FastReport.Code.VisualBasic
 {
     public class VBCodeProvider : CodeDomProvider
     {
@@ -16,7 +18,7 @@ namespace Microsoft.VisualBasic
 
         public override CompilerResults CompileAssemblyFromSource(CompilerParameters cp, string code)
         {
-            CodeAnalysis.SyntaxTree codeTree = Microsoft.CodeAnalysis.VisualBasic.VisualBasicSyntaxTree.ParseText(code);
+            SyntaxTree codeTree = VisualBasicSyntaxTree.ParseText(code);
             VisualBasicCompilationOptions options = new VisualBasicCompilationOptions(
                 OutputKind.DynamicallyLinkedLibrary,
                 true,
@@ -43,7 +45,7 @@ namespace Microsoft.VisualBasic
 
             using (MemoryStream ms = new MemoryStream())
             {
-                CodeAnalysis.Emit.EmitResult results = compilation.Emit(ms);
+                EmitResult results = compilation.Emit(ms);
                 if (results.Success)
                 {
                     return new CompilerResults()

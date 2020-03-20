@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 
-namespace System.CodeDom.Compiler
+namespace FastReport.Code.CodeDom.Compiler
 {
     public class CompilerResults
     {

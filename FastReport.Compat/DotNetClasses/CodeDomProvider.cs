@@ -2,9 +2,10 @@
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Reflection;
 
-namespace System.CodeDom.Compiler
+namespace FastReport.Code.CodeDom.Compiler
 {
     public abstract class CodeDomProvider : IDisposable
     {
@@ -13,7 +14,7 @@ namespace System.CodeDom.Compiler
         public abstract void Dispose();
         public abstract CompilerResults CompileAssemblyFromSource(CompilerParameters cp, string v);
 
-        protected void AddExtraAssemblies(Collections.Specialized.StringCollection referencedAssemblies, List<MetadataReference> references)
+        protected void AddExtraAssemblies(StringCollection referencedAssemblies, List<MetadataReference> references)
         {
 
             string[] assemblies = new[] {
