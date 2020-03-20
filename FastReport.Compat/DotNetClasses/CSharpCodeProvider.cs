@@ -1,17 +1,17 @@
 ﻿#if NETSTANDARD2_0 || NETSTANDARD2_1 || NETCOREAPP
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.CSharp;
 
 using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using FastReport.Code.CodeDom.Compiler;
 
-
-namespace Microsoft.CSharp
+namespace FastReport.Code.CSharp
 {
     public class CSharpCodeProvider : CodeDomProvider
     {
@@ -19,7 +19,7 @@ namespace Microsoft.CSharp
 
         public override CompilerResults CompileAssemblyFromSource(CompilerParameters cp, string code)
         {
-            CodeAnalysis.SyntaxTree codeTree = Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(code);
+            SyntaxTree codeTree = CSharpSyntaxTree.ParseText(code);
             CSharpCompilationOptions options = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary,
                 optimizationLevel: OptimizationLevel.Release,
                 generalDiagnosticOption: ReportDiagnostic.Default,
@@ -43,7 +43,7 @@ namespace Microsoft.CSharp
 
             using (MemoryStream ms = new MemoryStream())
             {
-                CodeAnalysis.Emit.EmitResult results = compilation.Emit(ms);
+                EmitResult results = compilation.Emit(ms);
                 if (results.Success)
                 {
                     return new CompilerResults()
