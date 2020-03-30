@@ -1,6 +1,6 @@
 ﻿<Project>
 
-  <PropertyGroup Condition="'$(TargetFramework)'=='netcoreapp3.0' OR '$(TargetFramework)'=='netcoreapp3.1' OR '$(TargetFramework)'=='netcoreapp5.0'">
+  <PropertyGroup Condition="('$(TargetFramework)'=='netcoreapp3.0' OR '$(TargetFramework)'=='netcoreapp3.1') AND '$(OS)' == 'Windows_NT'">
     <IsNetCoreWin>true</IsNetCoreWin>
     <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
@@ -9,7 +9,7 @@
   <Sdk Name="Microsoft.NET.Sdk.WindowsDesktop" Condition="$(IsNetCoreWin)" />
     
   <PropertyGroup>
-    <TargetFrameworks>net40;netstandard2.0;netstandard2.1;netcoreapp3.0;netcoreapp3.1;$(CustomTargetFrameworks)</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;netcoreapp3.0;netcoreapp3.1;$(CustomTargetFrameworks)</TargetFrameworks>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>FastReport.OpenSource.snk</AssemblyOriginatorKeyFile>
     <Authors>Fast Reports Inc.</Authors>
@@ -24,6 +24,7 @@
     <Description>Common compatible types for FastReport.Net</Description>
     <PackageIcon>frlogo-big.png</PackageIcon>
     <PackageIconUrl />
+    <OutputPath>bin\$(OS)\$(Configuration)\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'!='net40'">
@@ -31,6 +32,10 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="[2.0.0,)" />
     <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="[2.0.0,)" />
   </ItemGroup>
+    
+  <ItemGroup Condition="'$(TargetFramework)'=='netcoreapp3.0' OR '$(TargetFramework)'=='netcoreapp3.1'">
+    <PackageReference Include="System.Windows.Extensions" Version="4.6.0" />        
+   </ItemGroup>   
 
   <ItemGroup>
     <None Include="..\frlogo-big.png">

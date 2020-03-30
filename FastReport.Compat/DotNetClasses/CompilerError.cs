@@ -8,7 +8,7 @@ namespace FastReport.Code.CodeDom.Compiler
     public class CompilerError
     {
         public int Line { get; internal set; }
-        public object Column { get; internal set; }
+        public int Column { get; internal set; }
         public object ErrorText { get; internal set; }
         public object ErrorNumber { get; internal set; }
     }

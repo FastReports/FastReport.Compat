@@ -1,4 +1,4 @@
-#if NETSTANDARD2_0 || NETSTANDARD2_1
+#if !NETFRAMEWORK && !NETCOREWIN
 
 using System;
 using System.Collections.Generic;
@@ -13,7 +13,7 @@ using FastReport.Utils;
 
 namespace System.Windows.Forms
 {
-#region Enums
+    #region Enums
     [Flags]
     public enum Keys
     {
