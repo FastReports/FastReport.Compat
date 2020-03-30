@@ -1,5 +1,9 @@
 ﻿<Project>
 
+  <PropertyGroup>
+    <IsNetCoreWin>false</IsNetCoreWin>
+  </PropertyGroup>
+
   <PropertyGroup Condition="('$(TargetFramework)'=='netcoreapp3.0' OR '$(TargetFramework)'=='netcoreapp3.1') AND '$(OS)' == 'Windows_NT'">
     <IsNetCoreWin>true</IsNetCoreWin>
     <UseWindowsForms>true</UseWindowsForms>
