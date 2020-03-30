@@ -1,6 +1,6 @@
 ﻿<Project>
 
-  <PropertyGroup Condition="'$(TargetFramework)'=='netcoreapp3.0' OR '$(TargetFramework)'=='netcoreapp3.1' OR '$(TargetFramework)'=='netcoreapp5.0'">
+  <PropertyGroup Condition="'$(TargetFramework)'=='netcoreapp3.0' OR '$(TargetFramework)'=='netcoreapp3.1' AND '$(OS)' == 'Windows_NT'">
     <IsNetCoreWin>true</IsNetCoreWin>
     <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
@@ -24,6 +24,7 @@
     <Description>Common compatible types for FastReport.Net</Description>
     <PackageIcon>frlogo-big.png</PackageIcon>
     <PackageIconUrl />
+    <OutputPath>bin\$(OS)\$(Configuration)\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'!='net40'">
