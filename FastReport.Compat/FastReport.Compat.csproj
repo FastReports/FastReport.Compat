@@ -27,6 +27,10 @@
     <OutputPath>bin\$(OS)\$(Configuration)\</OutputPath>
   </PropertyGroup>
 
+  <PropertyGroup Condition="$(IsNetCoreWin)">
+    <DefineConstants>$(DefineConstants);NETCOREWIN</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup Condition="'$(TargetFramework)'!='net40'">
     <PackageReference Include="System.Drawing.Common" Version="[4.6.1,)" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="[2.0.0,)" />
@@ -35,8 +39,8 @@
     
   <ItemGroup Condition="'$(TargetFramework)'=='netcoreapp3.0' OR '$(TargetFramework)'=='netcoreapp3.1'">
     <PackageReference Include="System.Windows.Extensions" Version="4.6.0" />        
-   </ItemGroup>   
-
+   </ItemGroup>
+  
   <ItemGroup>
     <None Include="..\frlogo-big.png">
       <Pack>True</Pack>
