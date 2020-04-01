@@ -1,26 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;netcoreapp3.0</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.0</TargetFrameworks>
 
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)'=='Release' AND '$(TargetFramework)'!='netcoreapp3.0'">
-    <OutputPath>$(BaseOutputPath)\nuget\lib</OutputPath>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)'=='Release' AND '$(TargetFramework)'=='netcoreapp3.0'">
-    <OutputPath>$(BaseOutputPath)\nuget\runtimes\unix\lib</OutputPath>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <OutputPath>$(BaseOutputPath)\nuget\ref</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Drawing.Common" Version="[4.6.1,)" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="[2.0.0,)" />
     <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="[2.0.0,)" />
-  </ItemGroup>
-    
-  <ItemGroup Condition="'$(TargetFramework)'=='netcoreapp3.0'">
-    <PackageReference Include="System.Windows.Extensions" Version="4.6.0" />        
+    <PackageReference Include="System.Windows.Extensions" Version="4.6.0" />
   </ItemGroup>
   
   <ItemGroup>

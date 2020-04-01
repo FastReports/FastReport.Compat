@@ -7,6 +7,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FastReport.Compat", "FastRe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FastReport.Compat-Windows", "FastReport.Compat-Windows\FastReport.Compat-Windows.csproj", "{66152189-3B4A-4CB7-914D-E66A31020924}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{6C9F6257-00D2-4BB5-9175-44EA94D96EE2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FastReport.Compat", "ref\FastReport.Compat.csproj", "{480EC241-5629-4598-AD51-267CBEAFC88D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,9 +25,16 @@ Global
 		{66152189-3B4A-4CB7-914D-E66A31020924}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{66152189-3B4A-4CB7-914D-E66A31020924}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{66152189-3B4A-4CB7-914D-E66A31020924}.Release|Any CPU.Build.0 = Release|Any CPU
+		{480EC241-5629-4598-AD51-267CBEAFC88D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{480EC241-5629-4598-AD51-267CBEAFC88D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{480EC241-5629-4598-AD51-267CBEAFC88D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{480EC241-5629-4598-AD51-267CBEAFC88D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{480EC241-5629-4598-AD51-267CBEAFC88D} = {6C9F6257-00D2-4BB5-9175-44EA94D96EE2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C3FF3494-9BB7-4A9B-BE84-B3A9AA93C2D3}
