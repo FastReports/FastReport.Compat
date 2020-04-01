@@ -1,49 +1,28 @@
-﻿<Project>
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <IsNetCoreWin>false</IsNetCoreWin>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;netcoreapp3.0</TargetFrameworks>
+    <ExcludeCurrentNetCoreAppFromPackage>true</ExcludeCurrentNetCoreAppFromPackage>
+
   </PropertyGroup>
 
-  <PropertyGroup Condition="('$(TargetFramework)'=='netcoreapp3.0' OR '$(TargetFramework)'=='netcoreapp3.1') AND '$(OS)' == 'Windows_NT'">
-    <IsNetCoreWin>true</IsNetCoreWin>
-    <UseWindowsForms>true</UseWindowsForms>
+  <PropertyGroup Condition="'$(Configuration)'=='Release' AND '$(TargetFramework)'!='netcoreapp3.0'">
+    <OutputPath>$(BaseOutputPath)\nuget\lib</OutputPath>
   </PropertyGroup>
 
-  <Sdk Name="Microsoft.NET.Sdk" Condition="!$(IsNetCoreWin)" />
-  <Sdk Name="Microsoft.NET.Sdk.WindowsDesktop" Condition="$(IsNetCoreWin)" />
-    
-  <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;netcoreapp3.0;netcoreapp3.1;$(CustomTargetFrameworks)</TargetFrameworks>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>FastReport.OpenSource.snk</AssemblyOriginatorKeyFile>
-    <Authors>Fast Reports Inc.</Authors>
-    <Product>FastReport</Product>
-    <Copyright>Fast Reports Inc.</Copyright>
-    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
-    <PackageProjectUrl>https://www.fast-report.com/en/product/fast-report-net</PackageProjectUrl>
-    <PackageTags>reporting, reports, pdf, html, mvc, core</PackageTags>
-    <RepositoryUrl>https://github.com/FastReports/FastReport.Compat</RepositoryUrl>
-    <RepositoryType>GIT</RepositoryType>
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Description>Common compatible types for FastReport.Net</Description>
-    <PackageIcon>frlogo-big.png</PackageIcon>
-    <PackageIconUrl />
-    <OutputPath>bin\$(OS)\$(Configuration)\</OutputPath>
+  <PropertyGroup Condition="'$(Configuration)'=='Release' AND '$(TargetFramework)'=='netcoreapp3.0'">
+    <OutputPath>$(BaseOutputPath)\nuget\runtimes\unix\lib</OutputPath>
   </PropertyGroup>
 
-  <PropertyGroup Condition="$(IsNetCoreWin)">
-    <DefineConstants>$(DefineConstants);NETCOREWIN</DefineConstants>
-  </PropertyGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)'!='net40'">
+  <ItemGroup>
     <PackageReference Include="System.Drawing.Common" Version="[4.6.1,)" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="[2.0.0,)" />
     <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="[2.0.0,)" />
   </ItemGroup>
     
-  <ItemGroup Condition="'$(TargetFramework)'=='netcoreapp3.0' OR '$(TargetFramework)'=='netcoreapp3.1'">
+  <ItemGroup Condition="'$(TargetFramework)'=='netcoreapp3.0'">
     <PackageReference Include="System.Windows.Extensions" Version="4.6.0" />        
-   </ItemGroup>
+  </ItemGroup>
   
   <ItemGroup>
     <None Include="..\frlogo-big.png">

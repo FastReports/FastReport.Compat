@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29728.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FastReport.Compat", "FastReport.Compat\FastReport.Compat.csproj", "{7E39FC72-D7CA-44C7-B6C1-646211581FA0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FastReport.Compat", "FastReport.Compat\FastReport.Compat.csproj", "{7E39FC72-D7CA-44C7-B6C1-646211581FA0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FastReport.Compat-Windows", "FastReport.Compat-Windows\FastReport.Compat-Windows.csproj", "{66152189-3B4A-4CB7-914D-E66A31020924}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{7E39FC72-D7CA-44C7-B6C1-646211581FA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7E39FC72-D7CA-44C7-B6C1-646211581FA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7E39FC72-D7CA-44C7-B6C1-646211581FA0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{66152189-3B4A-4CB7-914D-E66A31020924}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66152189-3B4A-4CB7-914D-E66A31020924}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66152189-3B4A-4CB7-914D-E66A31020924}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66152189-3B4A-4CB7-914D-E66A31020924}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
