@@ -23,6 +23,7 @@
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
     <BuildProjectReferences>false</BuildProjectReferences>
+	<GenerateDependencyFile>false</GenerateDependencyFile>
   </PropertyGroup>
 
 </Project>
