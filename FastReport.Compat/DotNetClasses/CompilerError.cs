@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace System.CodeDom.Compiler
+namespace FastReport.Code.CodeDom.Compiler
 {
     public class CompilerError
     {
@@ -11,6 +11,7 @@ namespace System.CodeDom.Compiler
         public int Column { get; internal set; }
         public string ErrorText { get; internal set; }
         public string ErrorNumber { get; internal set; }
+
     }
 }
 

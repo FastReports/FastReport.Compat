@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace System.CodeDom.Compiler
+namespace FastReport.Code.CodeDom.Compiler
 {
     public class CodeGenerator
     {
