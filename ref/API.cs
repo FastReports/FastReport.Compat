@@ -971,8 +971,8 @@ namespace FastReport.Code.CodeDom.Compiler
     {
         public int Line { get; internal set; }
         public int Column { get; internal set; }
-        public object ErrorText { get; internal set; }
-        public object ErrorNumber { get; internal set; }
+        public string ErrorText { get; internal set; }
+        public string ErrorNumber { get; internal set; }
     }
 
     public class CompilerParameters
@@ -1247,13 +1247,6 @@ namespace FastReport.Utils
 
     #endregion
 
-    public class TEST
-    {
-        public int GetTest()
-        {
-            throw null;
-        }
-    }
 }
 
 #endregion
