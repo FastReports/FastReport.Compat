@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp3.0</TargetFrameworks>
+    <DefineConstants>$(DefineConstants);NETCOREWIN</DefineConstants>
+    <AssemblyName>FastReport.Compat</AssemblyName>
+    <PackageId>$(AssemblyName)</PackageId>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <OutputPath>$(BaseOutputPath)\$(TargetFramework)-Win</OutputPath>
+    <OutDir>$(OutputPath)</OutDir>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Debug' AND '$(TargetFramework)'=='netcoreapp3.0'">
+    <OutputPath>$(BaseOutputPath)\Debug\$(TargetFramework)-win</OutputPath>
+    <OutDir>$(OutputPath)</OutDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Drawing.Common" Version="[4.6.0,)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="[2.0.0,)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="[2.0.0,)" />
+    <PackageReference Include="System.Windows.Extensions" Version="4.6.0"/>
+  </ItemGroup>
+
+</Project>

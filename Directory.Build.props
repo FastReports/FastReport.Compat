@@ -2,7 +2,8 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <BaseOutputPath>..\bin</BaseOutputPath>
+    <SlnDir>$(MSBuildThisFileDirectory)</SlnDir>
+    <BaseOutputPath>$(SlnDir)bin</BaseOutputPath>
     <Authors>Fast Reports Inc.</Authors>
     <Product>FastReport</Product>
     <Copyright>Fast Reports Inc.</Copyright>
@@ -16,7 +17,8 @@
     <PackageIcon>frlogo-big.png</PackageIcon>
     <PackageIconUrl />
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\FastReport.OpenSource.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>$(SlnDir)FastReport.OpenSource.snk</AssemblyOriginatorKeyFile>
+    <SourceCode>$(SlnDir)src\shared</SourceCode>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
@@ -25,5 +27,22 @@
     <BuildProjectReferences>false</BuildProjectReferences>
 	<GenerateDependencyFile>false</GenerateDependencyFile>
   </PropertyGroup>
+
+
+  <ItemGroup>
+    <Compile Include="$(SourceCode)\**\*.cs"/>
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <None Include="$(SlnDir)frlogo-big.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="$(SlnDir)LICENSE.md">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
 
 </Project>

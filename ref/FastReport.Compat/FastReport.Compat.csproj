@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.0</TargetFrameworks>
-
   </PropertyGroup>
-
+  
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
-    <OutputPath>$(BaseOutputPath)\nuget\ref</OutputPath>
+    <OutputPath>$(BaseOutputPath)\$(TargetFramework)</OutputPath>
+    <OutDir>$(OutputPath)</OutDir>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,17 +14,6 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="[2.0.0,)" />
     <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="[2.0.0,)" />
     <PackageReference Include="System.Windows.Extensions" Version="4.6.0" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <None Include="..\frlogo-big.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-    <None Include="..\LICENSE.md">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
   </ItemGroup>
   
 </Project>
