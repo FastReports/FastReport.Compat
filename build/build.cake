@@ -146,8 +146,6 @@ Task("Compat")
     string arguments = $"pack {nuspec} -OutputDirectory \"{outdir}\" -Version {versionNum}";
     StartProcess(nuget, arguments);
 
-    }
-
   });
 
 #endregion Compat 
