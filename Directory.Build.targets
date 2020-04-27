@@ -7,7 +7,7 @@
           DestinationFolder="$(BaseOutputPath)\build"/>
 
       <!-- Copy nuspec for nuget pack -->
-    <Copy SourceFiles="$(SlnDir)\Nuget\Package.nuspec"
+    <Copy SourceFiles="$(SlnDir)\Nuget\FastReport.Compat.nuspec"
           DestinationFolder="$(BaseOutputPath)"/>
 
       <!-- Copy resources for nuget pack -->
