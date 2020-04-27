@@ -13,9 +13,37 @@
       <!-- Copy resources for nuget pack -->
     <Copy SourceFiles="$(SlnDir)\frlogo-big.png;$(SlnDir)\LICENSE.md"
           DestinationFolder="$(BaseOutputPath)"/>
+
+    <Copy SourceFiles="$(SlnDir)\Nuget\_._"
+          DestinationFolder="$(BaseOutputPath)\lib\netcoreapp3.0"/>
   </Target>
 
-  <Target Name="GenerateNuspec" AfterTargets="CopyFiles">
-    
+  <Target Name="VersionNuspec" AfterTargets="CopyFiles">
+      <ReplaceFileText 
+        Filename="$(BaseOutputPath)\FastReport.Compat.nuspec" 
+        MatchExpression="\$version\$" 
+        ReplacementText="$(Version)" />
   </Target>
+
+  <UsingTask TaskName="ReplaceFileText" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+    <ParameterGroup>
+      <Filename ParameterType="System.String" Required="true" />
+      <MatchExpression ParameterType="System.String" Required="true" />
+      <ReplacementText ParameterType="System.String" Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Reference Include="System.Core" />
+      <Using Namespace="System" />
+      <Using Namespace="System.IO" />
+      <Using Namespace="System.Text.RegularExpressions" />
+      <Code Type="Fragment" Language="cs">
+        <![CDATA[
+              File.WriteAllText(
+                  Filename,
+                  Regex.Replace(File.ReadAllText(Filename), MatchExpression, ReplacementText)
+                  );
+            ]]>
+      </Code>
+    </Task>
+  </UsingTask>
 </Project>

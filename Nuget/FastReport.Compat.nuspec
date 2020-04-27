@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>FastReport.Compat</id>
-    <version>2020.2.9</version>
+    <version>$version$</version>
     <authors>Fast Reports Inc.</authors>
     <owners>Fast Reports Inc.</owners>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
