@@ -29,7 +29,7 @@ namespace FastReport.Utils
       if (value == null)
         return "";
       if (value is string)
-        return (string)value;
+        return (string)value + "WIN";
       if (value is float)
         return ((float)value).ToString(CultureInfo.InvariantCulture.NumberFormat);
       if (value is double)
