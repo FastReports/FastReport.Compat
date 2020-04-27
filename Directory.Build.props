@@ -7,6 +7,7 @@
     <Authors>Fast Reports Inc.</Authors>
     <Product>FastReport</Product>
     <Copyright>Fast Reports Inc.</Copyright>
+    <PackageId>FastReport.Compat</PackageId>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
     <PackageProjectUrl>https://www.fast-report.com/en/product/fast-report-net</PackageProjectUrl>
     <PackageTags>reporting, reports, pdf, html, mvc, core</PackageTags>
@@ -25,13 +26,22 @@
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
     <BuildProjectReferences>false</BuildProjectReferences>
-	<GenerateDependencyFile>false</GenerateDependencyFile>
+	  <GenerateDependencyFile>false</GenerateDependencyFile>
   </PropertyGroup>
 
 
   <ItemGroup>
     <Compile Include="$(SourceCode)\**\*.cs"/>
   </ItemGroup>
+
+
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <BaseOutputPath>$(BaseOutputPath)\nuget</BaseOutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <BaseOutputPath>$(BaseOutputPath)\Debug</BaseOutputPath>
+  </PropertyGroup>
 
 
   <ItemGroup>

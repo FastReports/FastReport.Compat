@@ -21,7 +21,8 @@ string outdir = Argument("out-dir", "");
 
 string[] projects = new string[]
 {
-  System.IO.Path.Combine("FastReport.Compat", "FastReport.Compat.csproj")
+  System.IO.Path.Combine("src", "FastReport.Compat", "FastReport.Compat.csproj"),
+  System.IO.Path.Combine("src", "FastReport.Compat-Windows", "FastReport.Compat-Windows.csproj"),
 };
 
 #endregion Arguments
