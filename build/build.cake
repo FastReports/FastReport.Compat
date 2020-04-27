@@ -113,13 +113,6 @@ Task("Compat")
 
     DotNetCoreMSBuild(solutionFile, new DotNetCoreMSBuildSettings()
       .SetConfiguration(config)
-      .WithTarget("CleanObjAndBin")
-      .WithProperty("SolutionDir", solutionDirectory)
-      .WithProperty("SolutionFileName", solutionFilename)
-      .WithProperty("Version", versionNum));
-
-    DotNetCoreMSBuild(solutionFile, new DotNetCoreMSBuildSettings()
-      .SetConfiguration(config)
       .WithTarget("Clean")
       .WithProperty("SolutionDir", solutionDirectory)
       .WithProperty("SolutionFileName", solutionFilename)
