@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net40;netcoreapp3.0;$(CustomTargetFrameworks)</TargetFrameworks>
+    <DefineConstants>$(DefineConstants);NETCOREWIN</DefineConstants>
+    <AssemblyName>FastReport.Compat</AssemblyName>
+    <PackageId>$(AssemblyName)</PackageId>
+  </PropertyGroup>
+
+
+
+  <PropertyGroup Condition="'$(TargetFramework)'=='net40'">
+    <OutputPath>$(BaseOutputPath)\lib</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)'=='netcoreapp3.0'">
+    <OutDir>$(BaseOutputPath)\build\lib\$(TargetFramework)-Win</OutDir>
+  </PropertyGroup>
+
+  
+  <ItemGroup Condition="'$(TargetFramework)'!='net40'">
+    <PackageReference Include="System.Drawing.Common" Version="[4.6.0,)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="[2.0.0,)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="[2.0.0,)" />
+    <PackageReference Include="System.Windows.Extensions" Version="4.6.0"/>
+  </ItemGroup>
+  
+</Project>
