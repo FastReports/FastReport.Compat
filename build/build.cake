@@ -141,28 +141,11 @@ Task("Compat")
       .WithProperty("Version", versionNum)
     );
 
-    DotNetCoreBuildSettings settings = new DotNetCoreBuildSettings();
-    settings.Configuration = config;
+    string nuget = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "tools", "nuget.exe");
+    string nuspec = System.IO.Path.Combine(solutionDirectory, "bin", "nuget", "FastReport.Compat.nuspec");
+    string arguments = $"pack {nuspec} -OutputDirectory \"{outdir}\" -Version {versionNum}";
+    StartProcess(nuget, arguments);
 
-    foreach (var proj in projects)
-    {
-      DotNetCorePackSettings settings1 = new DotNetCorePackSettings();
-      settings1.Configuration = config;
-      settings1.NoBuild = true;
-      settings1.NoRestore = true;
-      settings1.OutputDirectory = outdir;
-      if (config.ToLower() == "debug")
-      {
-        settings1.IncludeSource = true;
-        settings1.IncludeSymbols = true;
-      }
-
-      settings1.MSBuildSettings = new DotNetCoreMSBuildSettings()
-        .WithProperty("SolutionDir", solutionDirectory)
-        .WithProperty("SolutionFileName", solutionFilename)
-        .WithProperty("Version", versionNum);
-
-      DotNetCorePack(System.IO.Path.Combine(solutionDirectory, proj), settings1);
     }
 
   });
