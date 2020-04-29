@@ -29,7 +29,6 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
-#if NETSTANDARD2_0 || NETSTANDARD2_1
 using System;
 using System.Text;
 using System.Collections;
@@ -42,10 +41,22 @@ using System.Drawing;
 
 namespace FastReport.TypeConverters
 {
-	public class FontConverter : TypeConverter
+    public class FontConverter : TypeConverter
 	{
-        public static FontConverter Instance { get; } = new FontConverter();
-		public FontConverter ()
+        public static readonly FontConverter Instance = new FontConverter();
+        // AlexTZ
+        private static PrivateFontCollection privateFontCollection = new PrivateFontCollection();
+
+        /// <summary>
+        /// Gets a PrivateFontCollection instance.
+        /// </summary>
+        public static PrivateFontCollection PrivateFontCollection
+        {
+            get { return privateFontCollection; }
+        }
+        // end AlexTZ
+		
+        public FontConverter ()
 		{
 		}
 		~FontConverter ()
@@ -116,7 +127,7 @@ namespace FastReport.TypeConverters
 
 			if ((destinationType == typeof (InstanceDescriptor)) && (value is Font)) {
 				Font font = (Font) value;
-				ConstructorInfo met = typeof(Font).GetTypeInfo ().GetConstructor (new Type[] {typeof(string), typeof(float), typeof(FontStyle), typeof(GraphicsUnit)});
+				ConstructorInfo met = typeof(Font).GetConstructor (new Type[] {typeof(string), typeof(float), typeof(FontStyle), typeof(GraphicsUnit)});
 				object[] args = new object[4];
 				args [0] = font.Name;
 				args [1] = font.Size;
@@ -213,7 +224,25 @@ namespace FastReport.TypeConverters
 				}
 			}
 
-			return new Font (font, f_size, f_style, f_unit);
+            // AlexTZ            
+            // return new Font (font, f_size, f_style, f_unit);
+            Font result = new Font(font, f_size, f_style, f_unit);
+            if (result.Name != font)
+            {
+                // font family not found in installed fonts, search in the user fonts
+                foreach (FontFamily f in PrivateFontCollection.Families)
+                {
+                    if (String.Compare(font, f.Name, true) == 0)
+                    {
+                        result = new Font(f, f_size, f_style, f_unit);
+                        break;
+                    }
+                }
+            }
+
+            return result;
+            // end AlexTZ
+
 		}
 
 		public override object CreateInstance (ITypeDescriptorContext context, IDictionary propertyValues)
@@ -282,8 +311,11 @@ namespace FastReport.TypeConverters
 
 				// font family not found in installed fonts
 				if (fontFamily == null) {
-					collection = new PrivateFontCollection ();
-					FontFamily [] privateFontList = collection.Families;
+					// AlexTZ
+                    //collection = new PrivateFontCollection ();
+                    collection = PrivateFontCollection;
+                    //
+                    FontFamily[] privateFontList = collection.Families;
 					foreach (FontFamily font in privateFontList) {
 						if (name == font.Name.ToLower ()) {
 							fontFamily = font;
@@ -383,4 +415,3 @@ namespace FastReport.TypeConverters
 		}
 	}
 }
-#endif
