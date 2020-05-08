@@ -8,7 +8,7 @@
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <license type="file">LICENSE.md</license>
     <icon>frlogo-big.png</icon>    
-    <releaseNotes>Summary of changes made in this release of the package.</releaseNotes>
+    <releaseNotes>See the latest changes on https://github.com/FastReports/FastReport.Compat </releaseNotes>
     <projectUrl>https://www.fast-report.com/en/product/fast-report-net</projectUrl>
     <description>Common compatible types for FastReport.Net</description>
     <copyright>Fast Reports Inc.</copyright>
