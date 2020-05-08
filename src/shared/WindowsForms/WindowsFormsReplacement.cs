@@ -6,7 +6,6 @@ using System.Text;
 using System.ComponentModel;
 using System.Globalization;
 using System.Drawing;
-using FastReport.Utils;
 
 #pragma warning disable 1591 // disable missing xml comments warning
 #pragma warning disable FR0000 // Field must be texted in lowerCamelCase.
@@ -532,7 +531,32 @@ namespace System.Windows.Forms
             return base.ConvertTo(context, culture, value, destinationType);
         }
     }
-#endregion
+
+    internal class Converter
+    {
+        /// <summary>
+        /// Converts an object to a string.
+        /// </summary>
+        /// <param name="value">The object to convert.</param>
+        /// <returns>The string that contains the converted value.</returns>
+        internal static string ToString(object value)
+        {
+            return TypeDescriptor.GetConverter(value).ConvertToInvariantString(value);
+        }
+
+        /// <summary>
+        /// Converts a string value to the specified data type.
+        /// </summary>
+        /// <param name="type">The data type to convert to.</param>
+        /// <param name="value">The string to convert from.</param>
+        /// <returns>The object of type specified in the <b>type</b> parameter that contains 
+        /// a converted value.</returns>
+        internal static object FromString(Type type, string value)
+        {
+            return TypeDescriptor.GetConverter(type).ConvertFromInvariantString(value);
+        }
+    }
+    #endregion
 
 
     public class KeyEventArgs : EventArgs
