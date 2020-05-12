@@ -1,50 +1,29 @@
-﻿//
-// System.Drawing.FontConverter.cs
-//
-// Authors:
-//	Dennis Hayes (dennish@Raytek.com)
-//	Gonzalo Paniagua Javier (gonzalo@ximian.com)
-//	Ravindra (rkumar@novell.com)
-//
-// Copyright (C) 2002,2003 Ximian, Inc.  http://www.ximian.com
-//
-// Copyright (C) 2004-2006 Novell, Inc (http://www.novell.com)
-//
-// Permission is hereby granted, free of charge, to any person obtaining
-// a copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to
-// permit persons to whom the Software is furnished to do so, subject to
-// the following conditions:
-// 
-// The above copyright notice and this permission notice shall be
-// included in all copies or substantial portions of the Software.
-// 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+// Note: the original file was modified by AlexTZ:
+// - code changed to support .Net 2.0
+// - PrivateFontCollection property added
+// - Instance property added
+
 using System;
-using System.Text;
 using System.Collections;
 using System.ComponentModel;
-using System.Globalization;
-using System.Drawing.Text;
 using System.ComponentModel.Design.Serialization;
+using System.Drawing.Text;
+using System.Globalization;
 using System.Reflection;
+using System.Text;
 using System.Drawing;
 
 namespace FastReport.TypeConverters
 {
     public class FontConverter : TypeConverter
-	{
-        public static readonly FontConverter Instance = new FontConverter();
-        // AlexTZ
+    {
+        private const string StylePrefix = "style=";
+
+        public static FontConverter Instance = new FontConverter();
         private static PrivateFontCollection privateFontCollection = new PrivateFontCollection();
 
         /// <summary>
@@ -52,366 +31,479 @@ namespace FastReport.TypeConverters
         /// </summary>
         public static PrivateFontCollection PrivateFontCollection
         {
-            get { return privateFontCollection; }
+          get { return privateFontCollection; }
         }
-        // end AlexTZ
-		
-        public FontConverter ()
-		{
-		}
-		~FontConverter ()
-		{
-			// required to match API definition
-		}	
-		public override bool CanConvertFrom (ITypeDescriptorContext context, Type sourceType)
-		{
-			if (sourceType == typeof (string))
-				return true;
 
-			return base.CanConvertFrom (context, sourceType);
-		}
+        /// <inheritdoc/>
+        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+        {
+            return sourceType == typeof(string) ? true : base.CanConvertFrom(context, sourceType);
+        }
 
-		public override bool CanConvertTo (ITypeDescriptorContext context, Type destinationType)
-		{
-			if (destinationType == typeof (String))
-				return true;
+        /// <inheritdoc/>
+        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+        {
+            return (destinationType == typeof(string)) || (destinationType == typeof(InstanceDescriptor));
+        }
 
-			if (destinationType == typeof (InstanceDescriptor))
-				return true;
-
-			return base.CanConvertTo (context, destinationType);
-		}
-
-		public override object ConvertTo (ITypeDescriptorContext context,
-			CultureInfo culture,
-			object value,
-			Type destinationType)
-		{
-			if ((destinationType == typeof (string)) && (value is Font)) {
-				Font font = (Font) value;
-				StringBuilder sb = new StringBuilder ();
-				sb.Append (font.Name).Append (culture.TextInfo.ListSeparator[0] + " ");
-				sb.Append (font.Size);
-
-				switch (font.Unit) {
-					// MS throws ArgumentException, if unit is set 
-					// to GraphicsUnit.Display
-					// Don't know what to append for GraphicsUnit.Display
-				case GraphicsUnit.Display:
-					sb.Append ("display"); break;
-
-				case GraphicsUnit.Document:
-					sb.Append ("doc"); break;
-
-				case GraphicsUnit.Point:
-					sb.Append ("pt"); break;
-
-				case GraphicsUnit.Inch:
-					sb.Append ("in"); break;
-
-				case GraphicsUnit.Millimeter:
-					sb.Append ("mm"); break;
-
-				case GraphicsUnit.Pixel:
-					sb.Append ("px"); break;
-
-				case GraphicsUnit.World:
-					sb.Append ("world"); break;
-				}
-
-				if (font.Style != FontStyle.Regular)
-					sb.Append (culture.TextInfo.ListSeparator[0] + " style=").Append (font.Style);
-
-				return sb.ToString ();
-			}
-
-			if ((destinationType == typeof (InstanceDescriptor)) && (value is Font)) {
-				Font font = (Font) value;
-				ConstructorInfo met = typeof(Font).GetConstructor (new Type[] {typeof(string), typeof(float), typeof(FontStyle), typeof(GraphicsUnit)});
-				object[] args = new object[4];
-				args [0] = font.Name;
-				args [1] = font.Size;
-				args [2] = font.Style;
-				args [3] = font.Unit;
-				return new InstanceDescriptor (met, args);
-			}
-			
-			return base.ConvertTo (context, culture, value, destinationType);
-		}
-
-		public override object ConvertFrom (ITypeDescriptorContext context, CultureInfo culture, object value)
-		{
-			FontStyle	f_style;
-			float		f_size;
-			GraphicsUnit	f_unit;
-			string		font;
-			string		units;
-			string[]	fields;
-
-			if (! (value is string)) {
-				return base.ConvertFrom (context, culture, value);
-			}
-
-			font = (string)value;
-			font = font.Trim ();
-
-			if (font.Length == 0) {
-				return null;
-			}
-
-			if (culture == null) {
-				culture = CultureInfo.CurrentCulture;
-			}
-
-			// Format is FontFamily, size[<units>[, style=1,2,3]]
-			// This is a bit tricky since the comma can be used for styles and fields
-			fields = font.Split(new char[] {culture.TextInfo.ListSeparator[0]});
-			if (fields.Length < 1) {
-				throw new ArgumentException("Failed to parse font format");
-			}
-
-			font = fields[0];
-			f_size = 8f;
-			units = "px";
-			f_unit = GraphicsUnit.Pixel;
-			if (fields.Length > 1) {	// We have a size
-				for (int i = 0; i < fields[1].Length; i++) {
-					if (Char.IsLetter(fields[1][i])) {
-						f_size = (float)TypeDescriptor.GetConverter(typeof(float)).ConvertFromString(context, culture, fields[1].Substring(0, i));
-						units = fields[1].Substring(i);
-						break;
-					}
-				}
-				if (units == "display") {
-					f_unit = GraphicsUnit.Display;
-				} else if (units == "doc") {
-					f_unit = GraphicsUnit.Document;
-				} else if (units == "pt") {
-					f_unit = GraphicsUnit.Point;
-				} else if (units == "in") {
-					f_unit = GraphicsUnit.Inch;
-				} else if (units == "mm") {
-					f_unit = GraphicsUnit.Millimeter;
-				} else if (units == "px") {
-					f_unit = GraphicsUnit.Pixel;
-				} else if (units == "world") {
-					f_unit = GraphicsUnit.World;
-				}
-			}
-
-			f_style = FontStyle.Regular;
-			if (fields.Length > 2) {	// We have style
-				string		compare;
-
-				for (int i = 2; i < fields.Length; i++) {
-					compare = fields[i];
-
-					if (compare.IndexOf("Regular") != -1) {
-						f_style |= FontStyle.Regular;
-					}
-					if (compare.IndexOf("Bold") != -1) {
-						f_style |= FontStyle.Bold;
-					}
-					if (compare.IndexOf("Italic") != -1) {
-						f_style |= FontStyle.Italic;
-					}
-					if (compare.IndexOf("Strikeout") != -1) {
-						f_style |= FontStyle.Strikeout;
-					}
-					if (compare.IndexOf("Underline") != -1) {
-						f_style |= FontStyle.Underline;
-					}
-				}
-			}
-
-            // AlexTZ            
-            // return new Font (font, f_size, f_style, f_unit);
-            Font result = new Font(font, f_size, f_style, f_unit);
-            if (result.Name != font)
+        /// <inheritdoc/>
+        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+        {
+            if (value is Font)
             {
-                // font family not found in installed fonts, search in the user fonts
-                foreach (FontFamily f in PrivateFontCollection.Families)
+                Font font = value as Font;
+                if (destinationType == typeof(string))
                 {
-                    if (String.Compare(font, f.Name, true) == 0)
+                    if (culture == null)
                     {
-                        result = new Font(f, f_size, f_style, f_unit);
-                        break;
+                        culture = CultureInfo.CurrentCulture;
+                    }
+
+                    StringBuilder sb = new StringBuilder();
+                    sb.Append(font.Name);
+                    sb.Append(culture.TextInfo.ListSeparator[0] + " ");
+                    sb.Append(font.Size.ToString(culture.NumberFormat));
+
+                    switch (font.Unit)
+                    {
+                        // MS throws ArgumentException, if unit is set
+                        // to GraphicsUnit.Display
+                        // Don't know what to append for GraphicsUnit.Display
+                        case GraphicsUnit.Display:
+                            sb.Append("display");
+                            break;
+
+                        case GraphicsUnit.Document:
+                            sb.Append("doc");
+                            break;
+
+                        case GraphicsUnit.Point:
+                            sb.Append("pt");
+                            break;
+
+                        case GraphicsUnit.Inch:
+                            sb.Append("in");
+                            break;
+
+                        case GraphicsUnit.Millimeter:
+                            sb.Append("mm");
+                            break;
+
+                        case GraphicsUnit.Pixel:
+                            sb.Append("px");
+                            break;
+
+                        case GraphicsUnit.World:
+                            sb.Append("world");
+                            break;
+                    }
+
+                    if (font.Style != FontStyle.Regular)
+                    {
+                        sb.Append(culture.TextInfo.ListSeparator[0] + " style=");
+                        sb.Append(font.Style.ToString());
+                    }
+
+                    return sb.ToString();
+                }
+
+                if (destinationType == typeof(InstanceDescriptor))
+                {
+                    ConstructorInfo met = typeof(Font).GetConstructor(new Type[] { typeof(string), typeof(float), typeof(FontStyle), typeof(GraphicsUnit) });
+                    object[] args = new object[4];
+                    args[0] = font.Name;
+                    args[1] = font.Size;
+                    args[2] = font.Style;
+                    args[3] = font.Unit;
+
+                    return new InstanceDescriptor(met, args);
+                }
+            }
+
+            return base.ConvertTo(context, culture, value, destinationType);
+        }
+
+        /// <inheritdoc/>
+        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+        {
+            if (!(value is string))
+            {
+                return base.ConvertFrom(context, culture, value);
+            }
+
+            string font = value as string;
+            font = font.Trim();
+
+            // Expected string format: "name[, size[, units[, style=style1[, style2[...]]]]]"
+            // Example using 'vi-VN' culture: "Microsoft Sans Serif, 8,25pt, style=Italic, Bold"
+            if (font.Length == 0)
+            {
+                return null;
+            }
+
+            if (culture == null)
+            {
+                culture = CultureInfo.CurrentCulture;
+            }
+
+            char separator = culture.TextInfo.ListSeparator[0]; // For vi-VN: ','
+            string fontName = font; // start with the assumption that only the font name was provided.
+            string style = null;
+            string sizeStr = null;
+            float fontSize = 8.25f;
+            FontStyle fontStyle = FontStyle.Regular;
+            GraphicsUnit units = GraphicsUnit.Point;
+
+            // Get the index of the first separator (would indicate the end of the name in the string).
+            int nameIndex = font.IndexOf(separator);
+
+            if (nameIndex < 0)
+            {
+                return new Font(fontName, fontSize, fontStyle, units);
+            }
+
+            // Some parameters are provided in addition to name.
+            fontName = font.Substring(0, nameIndex);
+
+            if (nameIndex < font.Length - 1)
+            {
+                // Get the style index (if any). The size is a bit problematic because it can be formatted differently
+                // depending on the culture, we'll parse it last.
+                int styleIndex = culture.CompareInfo.IndexOf(font, StylePrefix, CompareOptions.IgnoreCase);
+
+                if (styleIndex != -1)
+                {
+                    // style found.
+                    style = font.Substring(styleIndex, font.Length - styleIndex);
+
+                    // Get the mid-substring containing the size information.
+                    sizeStr = font.Substring(nameIndex + 1, styleIndex - nameIndex - 1);
+                }
+                else
+                {
+                    // no style.
+                    sizeStr = font.Substring(nameIndex + 1);
+                }
+
+                // Parse size.
+                string unitTokensSize = null;
+                string unitTokensUnit = null;
+                ParseSizeTokens(sizeStr, separator, ref unitTokensSize, ref unitTokensUnit);
+
+                if (unitTokensSize != null)
+                {
+                    try
+                    {
+                        fontSize = (float)TypeDescriptor.GetConverter(typeof(float)).ConvertFromString(context, culture, unitTokensSize);
+                    }
+                    catch
+                    {
+                        // Exception from converter is too generic.
+                        throw new ArgumentException("Invalid font string: " + font);
+                    }
+                }
+
+                if (unitTokensUnit != null)
+                {
+                    // ParseGraphicsUnits throws an ArgumentException if format is invalid.
+                    units = ParseGraphicsUnits(unitTokensUnit);
+                }
+
+                if (style != null)
+                {
+                    // Parse FontStyle
+                    style = style.Substring(6); // style string always starts with style=
+                    string[] styleTokens = style.Split(separator);
+
+                    for (int tokenCount = 0; tokenCount < styleTokens.Length; tokenCount++)
+                    {
+                        string styleText = styleTokens[tokenCount];
+                        styleText = styleText.Trim();
+
+                        fontStyle |= (FontStyle)Enum.Parse(typeof(FontStyle), styleText, true);
+
+                        // Enum.IsDefined doesn't do what we want on flags enums...
+                        FontStyle validBits = FontStyle.Regular | FontStyle.Bold | FontStyle.Italic | FontStyle.Underline | FontStyle.Strikeout;
+                        if ((fontStyle | validBits) != validBits)
+                        {
+                            throw new InvalidEnumArgumentException("FontStyle", (int)fontStyle, typeof(FontStyle));
+                        }
                     }
                 }
             }
 
+            Font result = new Font(fontName, fontSize, fontStyle, units);
+            if (result.Name != fontName)
+            {
+              // font family not found in installed fonts, search in the user fonts
+              foreach (FontFamily f in PrivateFontCollection.Families)
+              {
+                if (String.Compare(fontName, f.Name, true) == 0)
+                {
+                  result = new Font(f, fontSize, fontStyle, units);
+                  break;
+                }
+              }
+            }
+
             return result;
-            // end AlexTZ
+        }
 
-		}
+        private void ParseSizeTokens(string text, char separator, ref string size, ref string units)
+        {
+            text = text.Trim();
 
-		public override object CreateInstance (ITypeDescriptorContext context, IDictionary propertyValues)
-		{
-			Object value;
-			byte charSet = 1;
-			float size = 8;
-			String name = null;
-			bool vertical = false;
-			FontStyle style = FontStyle.Regular;
-			FontFamily fontFamily = null;
-			GraphicsUnit unit = GraphicsUnit.Point;
+            int length = text.Length;
+            int splitPoint;
 
-			if ((value = propertyValues ["GdiCharSet"]) != null)
-				charSet = (byte) value;
+            if (length > 0)
+            {
+                // text is expected to have a format like " 8,25pt, ". Leading and trailing spaces (trimmed above),
+                // last comma, unit and decimal value may not appear.  We need to make it ####.##CC
+                for (splitPoint = 0; splitPoint < length; splitPoint++)
+                {
+                    if (char.IsLetter(text[splitPoint]))
+                    {
+                        break;
+                    }
+                }
 
-			if ((value = propertyValues ["Size"]) != null)
-				size = (float) value;
+                char[] trimChars = new char[] { separator, ' ' };
 
-			if ((value = propertyValues ["Unit"]) != null)
-				unit = (GraphicsUnit) value;
+                if (splitPoint > 0)
+                {
+                    size = text.Substring(0, splitPoint);
+                    // Trimming spaces between size and units.
+                    size = size.Trim(trimChars);
+                }
 
-			if ((value = propertyValues ["Name"]) != null)
-				name = (String) value;
+                if (splitPoint < length)
+                {
+                    units = text.Substring(splitPoint);
+                    units = units.TrimEnd(trimChars);
+                }
+            }
+        }
 
-			if ((value = propertyValues ["GdiVerticalFont"]) != null)
-				vertical = (bool) value;
+        private GraphicsUnit ParseGraphicsUnits(string units)
+        {
+             if (units == "display") return GraphicsUnit.Display;
+             else if (units == "doc") return GraphicsUnit.Document;
+             else if (units == "pt") return GraphicsUnit.Point;
+             else if (units == "in") return GraphicsUnit.Inch;
+             else if (units == "mm") return GraphicsUnit.Millimeter;
+             else if (units == "px") return GraphicsUnit.Pixel;
+             else if (units == "world") return GraphicsUnit.World;
+             else throw new ArgumentException("Invalid font units: " + units);
+        }
 
-			if ((value = propertyValues ["Bold"]) != null) {
-				bool bold = (bool) value;
-				if (bold == true)
-					style |= FontStyle.Bold;
-			}
+        /// <inheritdoc/>
+        public override object CreateInstance(ITypeDescriptorContext context, IDictionary propertyValues)
+        {
+            object value;
+            byte charSet = 1;
+            float size = 8;
+            string name = null;
+            bool vertical = false;
+            FontStyle style = FontStyle.Regular;
+            FontFamily fontFamily = null;
+            GraphicsUnit unit = GraphicsUnit.Point;
 
-			if ((value = propertyValues ["Italic"]) != null) {
-				bool italic = (bool) value;
-				if (italic == true)
-					style |= FontStyle.Italic;
-			}
+            if ((value = propertyValues["GdiCharSet"]) != null)
+                charSet = (byte)value;
 
-			if ((value = propertyValues ["Strikeout"]) != null) {
-				bool strike = (bool) value;
-				if (strike == true)
-					style |= FontStyle.Strikeout;
-			}
+            if ((value = propertyValues["Size"]) != null)
+                size = (float)value;
 
-			if ((value = propertyValues ["Underline"]) != null) {
-				bool underline = (bool) value;
-				if (underline == true)
-					style |= FontStyle.Underline;
-			}
+            if ((value = propertyValues["Unit"]) != null)
+                unit = (GraphicsUnit)value;
 
-			/* ?? Should default font be culture dependent ?? */
-			if (name == null)
-				fontFamily = new FontFamily ("Tahoma");
-			else {
-				name = name.ToLower ();
-				FontCollection collection = new InstalledFontCollection ();
-				FontFamily [] installedFontList = collection.Families;
-				foreach (FontFamily font in installedFontList) {
-					if (name == font.Name.ToLower ()) {
-						fontFamily = font;
-						break;
-					}
-				}
+            if ((value = propertyValues["Name"]) != null)
+                name = (string)value;
 
-				// font family not found in installed fonts
-				if (fontFamily == null) {
-					// AlexTZ
-                    //collection = new PrivateFontCollection ();
+            if ((value = propertyValues["GdiVerticalFont"]) != null)
+                vertical = (bool)value;
+
+            if ((value = propertyValues["Bold"]) != null)
+            {
+                if ((bool)value == true)
+                    style |= FontStyle.Bold;
+            }
+
+            if ((value = propertyValues["Italic"]) != null)
+            {
+                if ((bool)value == true)
+                    style |= FontStyle.Italic;
+            }
+
+            if ((value = propertyValues["Strikeout"]) != null)
+            {
+                if ((bool)value == true)
+                    style |= FontStyle.Strikeout;
+            }
+
+            if ((value = propertyValues["Underline"]) != null)
+            {
+                if ((bool)value == true)
+                    style |= FontStyle.Underline;
+            }
+
+            if (name == null)
+            {
+                fontFamily = new FontFamily("Tahoma");
+            }
+            else
+            {
+                FontCollection collection = new InstalledFontCollection();
+                FontFamily[] installedFontList = collection.Families;
+                foreach (FontFamily font in installedFontList)
+                {
+                    if (name.Equals(font.Name, StringComparison.OrdinalIgnoreCase))
+                    {
+                        fontFamily = font;
+                        break;
+                    }
+                }
+
+                // font family not found in installed fonts
+                if (fontFamily == null)
+                {
                     collection = PrivateFontCollection;
-                    //
                     FontFamily[] privateFontList = collection.Families;
-					foreach (FontFamily font in privateFontList) {
-						if (name == font.Name.ToLower ()) {
-							fontFamily = font;
-							break;
-						}
-					}
-				}
+                    foreach (FontFamily font in privateFontList)
+                    {
+                        if (name.Equals(font.Name, StringComparison.OrdinalIgnoreCase))
+                        {
+                            fontFamily = font;
+                            break;
+                        }
+                    }
+                }
 
-				// font family not found in private fonts also
-				if (fontFamily == null)
-					fontFamily = FontFamily.GenericSansSerif;
-			}
+                // font family not found in private fonts also
+                if (fontFamily == null)
+                    fontFamily = FontFamily.GenericSansSerif;
+            }
 
-			return new Font (fontFamily, size, style, unit, charSet, vertical);
-		}
+            return new Font(fontFamily, size, style, unit, charSet, vertical);
+        }
 
-		public override bool GetCreateInstanceSupported (ITypeDescriptorContext context)
-		{
-			return true;
-		}
+        /// <inheritdoc/>
+        public override bool GetCreateInstanceSupported(ITypeDescriptorContext context)
+        {
+          return true;
+        }
 
-		public override PropertyDescriptorCollection GetProperties
-			(ITypeDescriptorContext context,
-			object value, Attribute [] attributes)
-		{
-			if (value is Font)
-				return TypeDescriptor.GetProperties (value, attributes);
+        /// <inheritdoc/>
+        public override PropertyDescriptorCollection GetProperties(
+            ITypeDescriptorContext context,
+            object value,
+            Attribute[] attributes)
+        {
+            return value is Font ? TypeDescriptor.GetProperties(value, attributes) : base.GetProperties(context, value, attributes);
+        }
 
-			return base.GetProperties (context, value, attributes);
-		}
+        /// <inheritdoc/>
+        public override bool GetPropertiesSupported(ITypeDescriptorContext context)
+        {
+          return true;
+        }
 
-		public override bool GetPropertiesSupported (ITypeDescriptorContext context)
-		{
-			return true;
-		}
+        public sealed class FontNameConverter : TypeConverter, IDisposable
+        {
+            private readonly FontFamily[] _fonts;
 
-		public sealed class FontNameConverter : TypeConverter
-		, IDisposable		
-		{
-			FontFamily [] fonts;
-			
-			public FontNameConverter ()
-			{
-				fonts = FontFamily.Families;
-			}	
-			void IDisposable.Dispose ()
-			{
-			}
-			public override bool CanConvertFrom (ITypeDescriptorContext context, Type sourceType)
-			{
-				if (sourceType == typeof (string))
-					return true;
+            public FontNameConverter()
+            {
+                _fonts = FontFamily.Families;
+            }
 
-				return base.CanConvertFrom (context, sourceType);
-			}
+            void IDisposable.Dispose()
+            {
+            }
 
-			public override object ConvertFrom (ITypeDescriptorContext context, CultureInfo culture, object value)
-			{
-				if (value is string)
-					return value;
-				return base.ConvertFrom (context, culture, value);
-			}
+            /// <inheritdoc/>
+            public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+            {
+                return sourceType == typeof(string) ? true : base.CanConvertFrom(context, sourceType);
+            }
 
-			public override StandardValuesCollection GetStandardValues (ITypeDescriptorContext context)
-			{
-				string [] values = new string [fonts.Length];
-				for (int i = fonts.Length; i > 0;){
-					i--;
-					values [i] = fonts [i].Name;
-				}
-				
-				return new TypeConverter.StandardValuesCollection (values);
-			}
+            /// <inheritdoc/>
+            public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+            {
+                return value is string ? MatchFontName((value as string), context) : base.ConvertFrom(context, culture, value);
+            }
 
-			public override bool GetStandardValuesExclusive (ITypeDescriptorContext context)
-			{
-				// We allow other values other than those in the font list.
-				return false;
-			}
+            /// <inheritdoc/>
+            public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
+            {
+                string[] values = new string[_fonts.Length];
+                for (int i = 0; i < _fonts.Length; i++)
+                {
+                    values[i] = _fonts[i].Name;
+                }
+                Array.Sort(values, Comparer.Default);
 
-			public override bool GetStandardValuesSupported (ITypeDescriptorContext context)
-			{
-				// Yes, we support picking an element from the list. 
-				return true;
-			}
-		}
+                return new TypeConverter.StandardValuesCollection(values);
+            }
 
-		public class FontUnitConverter : EnumConverter
-		{
-			public FontUnitConverter () : base (typeof (GraphicsUnit)) {}
-			
-			public override StandardValuesCollection GetStandardValues (ITypeDescriptorContext context)
-			{
-				return base.GetStandardValues (context);
-			}
-				
-		}
-	}
+            // We allow other values other than those in the font list.
+            /// <inheritdoc/>
+            public override bool GetStandardValuesExclusive(ITypeDescriptorContext context)
+            {
+                return false;
+            }
+
+            // Yes, we support picking an element from the list.
+            /// <inheritdoc/>
+            public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
+            {
+                return true;
+            }
+
+            private string MatchFontName(string name, ITypeDescriptorContext context)
+            {
+                // Try a partial match
+                string bestMatch = null;
+
+                foreach (string fontName in GetStandardValues(context))
+                {
+                    if (fontName.Equals(name, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        // For an exact match, return immediately
+                        return fontName;
+                    }
+                    if (fontName.StartsWith(name, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        if (bestMatch == null || fontName.Length <= bestMatch.Length)
+                        {
+                            bestMatch = fontName;
+                        }
+                    }
+                }
+
+                // No match... fall back on whatever was provided
+                return bestMatch != null ? bestMatch : name;
+            }
+        }
+
+        public class FontUnitConverter : EnumConverter
+        {
+            public FontUnitConverter() : base(typeof(GraphicsUnit)) { }
+
+            /// <inheritdoc/>
+            public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
+            {
+                // display graphic unit is not supported.
+                if (Values == null)
+                {
+                    base.GetStandardValues(context); // sets "values"
+                    ArrayList filteredValues = new ArrayList(Values);
+                    filteredValues.Remove(GraphicsUnit.Display);
+                    Values = new StandardValuesCollection(filteredValues);
+                }
+                return Values;
+            }
+        }
+    }
 }
