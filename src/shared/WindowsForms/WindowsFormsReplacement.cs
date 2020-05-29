@@ -726,6 +726,14 @@ namespace System.Windows.Forms
         public event PaintEventHandler Paint;
         public event EventHandler LostFocus;
 
+        public Control() : base()
+        {
+            // Compute our default size.
+            Size defaultSize = DefaultSize;
+            Width = defaultSize.Width;
+            Height = defaultSize.Height;
+        }
+
         public void BringToFront() { }
         public void Focus() { }
         public void Hide() { }
@@ -780,6 +788,12 @@ namespace System.Windows.Forms
         public ContentAlignment ImageAlign;
         public ContentAlignment TextAlign = ContentAlignment.MiddleCenter;                  //
         public TextImageRelation TextImageRelation;
+
+        protected override Size DefaultSize {
+            get {
+                return new Size(75, 23);
+            }
+        }
     }
 
     public class Button : ButtonBase
@@ -797,6 +811,12 @@ namespace System.Windows.Forms
         public object Tag;
 
         public event EventHandler CheckedChanged;
+
+        protected override Size DefaultSize {
+            get {
+                return new Size(104, 24);
+            }
+        }
     }
 
     public class ListControl : Control
@@ -827,6 +847,12 @@ namespace System.Windows.Forms
         public bool UseTabStops;
         public SelectedIndexCollection SelectedIndices = new SelectedIndexCollection();
         public SelectedObjectCollection SelectedItems = new SelectedObjectCollection();
+
+        protected override Size DefaultSize {
+            get {
+                return new Size(120, 96);
+            }
+        }
     }
 
     public class ComboBox : ListControl
@@ -836,6 +862,13 @@ namespace System.Windows.Forms
         public int DropDownHeight;
         public int MaxDropDownItems;
         public object Tag;
+
+        protected override Size DefaultSize {
+            get {
+                return new Size(121,
+                    21);    // Approximate value, may be incorrect
+            }
+        }
     }
 
     public class CheckedListBox : ListBox
@@ -875,12 +908,26 @@ namespace System.Windows.Forms
         public bool ShowCheckBox;
         public bool ShowUpDown;
         public DateTime Value = DateTime.Now;                                               //
+
+        protected override Size DefaultSize {
+            get {
+                return new Size(200, 
+                    20);    // Approximate value, may be incorrect
+            }
+        }
     }
 
     public class Label : Control
     {
         public bool AutoSize;
         public ContentAlignment TextAlign = ContentAlignment.TopLeft;                       //
+
+        protected override Size DefaultSize {
+            get {
+                return new Size(100, 
+                    23);    // Approximate value, may be incorrect
+            }
+        }
     }
 
     public class SelectionRange
@@ -914,6 +961,12 @@ namespace System.Windows.Forms
 
         public ContentAlignment CheckAlign;
         public bool Checked = false;                                                        //
+
+        protected override Size DefaultSize {
+            get {
+                return new Size(104, 24);
+            }
+        }
     }
 
     public class TextBox : Control
@@ -931,6 +984,15 @@ namespace System.Windows.Forms
         public BorderStyle BorderStyle;
 
         public void SelectAll() { }
+
+        protected override Size DefaultSize {
+            get {
+                return new Size(100, 
+                    20);    // Approximate value, may be incorrect
+            }
+        }
+
+
     }
 
     public class Form : Control
@@ -954,6 +1016,12 @@ namespace System.Windows.Forms
         public DialogResult ShowDialog()
         {
             return DialogResult.OK;
+        }
+
+        protected override Size DefaultSize {
+            get {
+                return new Size(300, 300);
+            }
         }
     }
 
