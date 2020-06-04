@@ -684,9 +684,16 @@ namespace System.Windows.Forms
 
     public class Control : Component
     {
-        public Control Parent;                                                              //
+        public Control Parent {
+            get { return _parent; }
+            set {
+                _parent = value;
+                _parent.Controls.Add(this);
+            }
+        }
         public List<Control> Controls = new List<Control>();
 
+        private Control _parent;
         public Cursor Cursor;
         public bool Enabled = true;                                                         //
         public Font Font;                                           //
@@ -734,6 +741,12 @@ namespace System.Windows.Forms
             Height = defaultSize.Height;
         }
 
+        public Control(Control parent, string text) : this()
+        {
+            Parent = parent;
+            Text = text;
+        }
+
         public void BringToFront() { }
         public void Focus() { }
         public void Hide() { }
@@ -767,6 +780,16 @@ namespace System.Windows.Forms
         protected virtual void OnDoubleClick(EventArgs e) { }
         protected virtual void OnInvalidated(InvalidateEventArgs e) { }
         protected virtual void OnBackColorChanged(EventArgs eventArgs) { }
+    }
+
+    public class GroupBox : Control
+    {
+        protected override Size DefaultSize {
+            get {
+                return new Size(200, 100);
+            }
+        }
+
     }
 
     public class ToolTip : Control
@@ -831,8 +854,17 @@ namespace System.Windows.Forms
         public DrawMode DrawMode;
         public int ItemHeight;
         public ObjectCollection Items = new ObjectCollection();                             //
-        public int SelectedIndex;                                                           //
-        public object SelectedItem;
+        private int selectedIndex;
+
+        public virtual int SelectedIndex {
+            get { return selectedIndex; }
+            set {
+                selectedIndex = value;
+                SelectedItem = Items[value];
+                Text = SelectedItem.ToString();
+            }
+        }
+        public object SelectedItem { get; set; }
     }
 
     public class ListBox : ListControl
@@ -880,17 +912,23 @@ namespace System.Windows.Forms
 
         public bool CheckOnClick;
         public CheckedIndexCollection CheckedIndices = new CheckedIndexCollection();        //
-        public CheckedItemCollection CheckedItems = new CheckedItemCollection();            //
+        public CheckedItemCollection CheckedItems { get; } = new CheckedItemCollection();
+        //
 
         public void SetItemChecked(int index, bool check)
         {
             if (check)
             {
-                if (!CheckedIndices.Contains(index)) CheckedIndices.Add(index);
+                if (!CheckedIndices.Contains(index))
+                {
+                    CheckedIndices.Add(index);
+                    CheckedItems.Add(Items[index]);
+                }
             }
             else
             {
                 CheckedIndices.Remove(index);
+                CheckedItems.Remove(Items[index]);
             }
         }
     }
@@ -957,10 +995,29 @@ namespace System.Windows.Forms
 
     public class RadioButton : ButtonBase
     {
+        private bool isChecked = false; 
         public event EventHandler CheckedChanged;
 
         public ContentAlignment CheckAlign;
-        public bool Checked = false;                                                        //
+        public bool Checked {
+            get { return isChecked; }
+            set 
+            {
+                if(isChecked != value)
+                {
+                    isChecked = value;
+                    if (value && Parent != null)
+                    {
+                        var controls = this.Parent.Controls;
+                        foreach (var control in controls)
+                        {
+                            if (control is RadioButton && control != this)
+                                (control as RadioButton).isChecked = false;
+                        }
+                    }
+                }
+            }
+        }                                                      //
 
         protected override Size DefaultSize {
             get {
