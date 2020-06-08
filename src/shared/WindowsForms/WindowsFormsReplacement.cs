@@ -819,6 +819,43 @@ namespace System.Windows.Forms
         }
     }
 
+    public class PictureBox : Control
+    {
+        private Image _image;
+        private BorderStyle _borderStyle = BorderStyle.None;
+        private PictureBoxSizeMode _sizeMode = PictureBoxSizeMode.Normal;
+
+        public BorderStyle BorderStyle {
+            get => _borderStyle;
+            set {
+                if (_borderStyle != value)
+                {
+                    _borderStyle = value;
+                }
+            }
+        }
+
+        public Image Image {
+            get => _image;
+            set => _image = value;
+        }
+
+        public PictureBoxSizeMode SizeMode {
+            get => _sizeMode;
+            set {
+                if (_sizeMode != value)
+                {
+                    _sizeMode = value;
+                }
+            }
+        }
+
+
+        protected override Size DefaultSize => new Size(100, 50);
+
+
+    }
+
     public class Button : ButtonBase
     {
         public DialogResult DialogResult = DialogResult.None;                               //
