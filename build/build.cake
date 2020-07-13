@@ -128,6 +128,15 @@ Task("Compat")
       .WithProperty("Version", versionNum)
     );
 
+    DotNetCoreMSBuild(solutionFile, new DotNetCoreMSBuildSettings()
+      .SetConfiguration(config)
+      .WithTarget("PrepareCompatPackage")
+      .WithProperty("SolutionDir", solutionDirectory)
+      .WithProperty("SolutionFileName", solutionFilename)
+      .WithProperty("Version", versionNum)
+    );
+
+
     string nuget = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "tools", "nuget.exe");
     string nuspec = System.IO.Path.Combine(solutionDirectory, "bin", "nuget", "FastReport.Compat.nuspec");
     string arguments = $"pack {nuspec} -OutputDirectory \"{outdir}\" -Version {versionNum}";
