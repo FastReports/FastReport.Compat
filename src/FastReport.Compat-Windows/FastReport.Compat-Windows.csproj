@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net40;netcoreapp3.0;$(CustomTargetFrameworks)</TargetFrameworks>
+    <TargetFrameworks>net40;netcoreapp3.0;net5.0-windows;$(CustomTargetFrameworks)</TargetFrameworks>
     <DefineConstants>$(DefineConstants);NETCOREWIN</DefineConstants>
     <AssemblyName>FastReport.Compat</AssemblyName>
     <PackageId>$(AssemblyName)</PackageId>
@@ -9,7 +9,7 @@
 
 
 
-  <PropertyGroup Condition="'$(TargetFramework)'=='net40'">
+  <PropertyGroup Condition="'$(TargetFramework)'!='netcoreapp3.0'">
     <OutputPath>$(BaseOutputPath)\lib</OutputPath>
   </PropertyGroup>
 
