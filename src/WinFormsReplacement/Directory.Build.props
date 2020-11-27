@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <SlnDir>$(MSBuildThisFileDirectory)</SlnDir>
+    <BaseOutputPath>$(SlnDir)bin</BaseOutputPath>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(SlnDir)..\..\FastReport.OpenSource.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <BuildProjectReferences>false</BuildProjectReferences>
+	  <GenerateDependencyFile>false</GenerateDependencyFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <BaseOutputPath>$(BaseOutputPath)\nuget</BaseOutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <BaseOutputPath>$(BaseOutputPath)\Debug</BaseOutputPath>
+  </PropertyGroup>
+
+</Project>

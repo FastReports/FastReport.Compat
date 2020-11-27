@@ -1,18 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;netcoreapp3.0</TargetFrameworks>
+    <TargetFrameworks>net40;netstandard2.0;netstandard2.1;netcoreapp3.0;net5.0-windows7.0</TargetFrameworks>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)'!='netcoreapp3.0'">
+  <PropertyGroup>
     <OutputPath>$(BaseOutputPath)\lib</OutputPath>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)'=='netcoreapp3.0'">
-    <OutputPath>$(BaseOutputPath)\build\lib</OutputPath>
+  <!--For Net Core3.0 TFM we build without WinForms replacement and add separate library with WinForms.-->
+  <PropertyGroup Condition="'$(TargetFramework)'=='net40' Or '$(TargetFramework)'=='netcoreapp3.0' Or '$(TargetFramework)'=='net5.0-windows7.0'">
+    <DefineConstants>$(DefineConstants);NETCOREWIN</DefineConstants>
   </PropertyGroup>
-
-  <ItemGroup>
+  
+  <ItemGroup Condition="'$(TargetFramework)'!='net40'">
     <PackageReference Include="System.Drawing.Common" Version="[4.6.0,)" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="[3.2.0,)" />
     <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="[3.2.0,)" />
