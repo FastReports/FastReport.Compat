@@ -2,6 +2,8 @@
 #addin "Cake.FileHelpers"
 /* fixformat ignore:end */
 
+using Path = System.IO.Path;
+
 #region Constants
 
 string Prepare = "Prepare";
@@ -99,48 +101,102 @@ Task("Compat")
   .IsDependentOn(PrepareNuget)
   .Does(() =>
   {
-    string solutionFile = System.IO.Path.Combine(solutionDirectory, solutionFilename);
+    const string tfmCore30 = ".NETCoreApp3.0";
+    const string tfmNet5 = "net5.0-windows7.0";
 
-    string versionNum = version + "-" + config.ToLower();
-    if (config.ToLower() == "release")
-      versionNum = version;
+    string solutionFile = Path.Combine(solutionDirectory, solutionFilename);
+    string usedPackagesVersionPath = Path.Combine(solutionDirectory, "UsedPackages.version");
 
-    DotNetCoreMSBuild(solutionFile, new DotNetCoreMSBuildSettings()
-      .SetConfiguration(config)
-      .WithTarget("Clean")
-      .WithProperty("SolutionDir", solutionDirectory)
-      .WithProperty("SolutionFileName", solutionFilename)
-      .WithProperty("Version", versionNum));
+    string nugetDir = Path.Combine(solutionDirectory, "bin", "nuget");
+    // Clean nuget directory for package
+    if (DirectoryExists(nugetDir))
+    {
+      DeleteDirectory(nugetDir, new DeleteDirectorySettings{
+        Force = true, 
+        Recursive = true
+      });
+    }
 
-    DotNetCoreMSBuild(solutionFile, new DotNetCoreMSBuildSettings()
-      .SetConfiguration(config)
-      .WithTarget("Restore")
-      .WithProperty("SolutionDir", solutionDirectory)
-      .WithProperty("SolutionFileName", solutionFilename)
-      .WithProperty("Version", versionNum)
-    );
+    TargetBuildCore("Clean");
 
-    DotNetCoreMSBuild(solutionFile, new DotNetCoreMSBuildSettings()
-      .SetConfiguration(config)
-      .WithTarget("Build")
-      .WithProperty("SolutionDir", solutionDirectory)
-      .WithProperty("SolutionFileName", solutionFilename)
-      .WithProperty("Version", versionNum)
-    );
+    TargetBuildCore("Restore");
 
-    DotNetCoreMSBuild(solutionFile, new DotNetCoreMSBuildSettings()
-      .SetConfiguration(config)
-      .WithTarget("PrepareCompatPackage")
-      .WithProperty("SolutionDir", solutionDirectory)
-      .WithProperty("SolutionFileName", solutionFilename)
-      .WithProperty("Version", versionNum)
-    );
+    TargetBuildCore("Build");
+
+    TargetBuildCore("PrepareCompatPackage");
+
+    // Get used packages version
+    string SystemDrawingCommonVersion = XmlPeek(usedPackagesVersionPath, "//SystemDrawingCommonVersion/text()");
+    Information($"System.Drawing.Common version: {SystemDrawingCommonVersion}");
+    string CodeAnalysisCSharpVersion = XmlPeek(usedPackagesVersionPath, "//CodeAnalysisCSharpVersion/text()");
+    Information($"Microsoft.CodeAnalysis.CSharp version: {CodeAnalysisCSharpVersion}");
+    string CodeAnalysisVisualBasicVersion = XmlPeek(usedPackagesVersionPath, "//CodeAnalysisVisualBasicVersion/text()");
+    Information($"Microsoft.CodeAnalysis.VisualBasic version: {CodeAnalysisVisualBasicVersion}");
 
 
-    string nuget = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "tools", "nuget.exe");
-    string nuspec = System.IO.Path.Combine(solutionDirectory, "bin", "nuget", "FastReport.Compat.nuspec");
-    string arguments = $"pack {nuspec} -OutputDirectory \"{outdir}\" -Version {versionNum}";
-    StartProcess(nuget, arguments);
+    var dependencies = new List<NuSpecDependency>();
+    AddNuSpecDep(null, null, ".NETFramework4.0");
+    AddNuSpecDepCore("System.Drawing.Common", SystemDrawingCommonVersion);
+    AddNuSpecDepCore("Microsoft.CodeAnalysis.CSharp", CodeAnalysisCSharpVersion);
+    AddNuSpecDepCore("Microsoft.CodeAnalysis.VisualBasic", CodeAnalysisVisualBasicVersion);
+    AddNuSpecDep("System.Windows.Extensions", "4.6.0", tfmCore30);
+
+    var files = new[] {
+       new NuSpecContent{Source = Path.Combine(nugetDir, "**", "*.*"), Target = ""},
+    };
+
+    var nuGetPackSettings = new NuGetPackSettings {
+        Id                      = "FastReport.Compat",
+        Version                 = version,
+        Authors                 = new[] {"Fast Reports Inc."},
+        Owners                  = new[] {"Fast Reports Inc."},
+        Description             = "Common compatible types for FastReport .Net, Core and Mono",
+        Repository              = new NuGetRepository{Type = "GIT", Url = "https://github.com/FastReports/FastReport.Compat"},
+        ProjectUrl              = new Uri("https://www.fast-report.com/en/product/fast-report-net"),
+        Icon                    = "frlogo-big.png",  // Property Icon available since Cake 1.0
+        IconUrl                 = new Uri("https://raw.githubusercontent.com/FastReports/FastReport.Compat/master/frlogo-big.png"),
+        ReleaseNotes            = new[] { "See the latest changes on https://github.com/FastReports/FastReport.Compat"},
+        License                 = new NuSpecLicense {Type = "file", Value = "LICENSE.md"},
+        Copyright               = "Fast Reports Inc.",
+        Tags                    = new [] {"reporting", "reports", "pdf", "html", "mvc", "docx", "xlsx", "Core"},
+        RequireLicenseAcceptance= true,
+        Symbols                 = false,
+        NoPackageAnalysis       = true,
+        Files                   = files,
+        Dependencies            = dependencies,
+        BasePath                = nugetDir,
+        OutputDirectory         = outdir
+    };
+
+    // Pack
+    NuGetPack(nuGetPackSettings);
+
+    // Local functions:
+
+    // For Net Standard 2.0, Standard 2.1, Core 3.0 and Net 5.0
+    void AddNuSpecDepCore(string id, string version)
+    {
+      AddNuSpecDep(id, version, ".NETStandard2.0");
+      AddNuSpecDep(id, version, ".NETStandard2.1");
+      AddNuSpecDep(id, version, tfmCore30);
+      AddNuSpecDep(id, version, tfmNet5);
+    }
+
+    void AddNuSpecDep(string id, string version, string tfm)
+    {
+      dependencies.Add(new NuSpecDependency{Id = id, Version = version, TargetFramework = tfm});
+    }
+
+    void TargetBuildCore(string target)
+    {
+      DotNetCoreMSBuild(solutionFile, new DotNetCoreMSBuildSettings()
+        .SetConfiguration(config)
+        .WithTarget(target)
+        .WithProperty("SolutionDir", solutionDirectory)
+        .WithProperty("SolutionFileName", solutionFilename)
+        .WithProperty("Version", version)
+      );
+    }
 
   });
 
