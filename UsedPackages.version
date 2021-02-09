@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+<!-- This group sets version used packages in FastReport.Compat and package -->
+    <PropertyGroup>
+
+        <SystemDrawingCommonVersion>[4.6.0,)</SystemDrawingCommonVersion>
+
+        <CodeAnalysisCSharpVersion>[3.3.0,)</CodeAnalysisCSharpVersion>
+
+        <CodeAnalysisVisualBasicVersion>[3.3.0,)</CodeAnalysisVisualBasicVersion>
+		
+    </PropertyGroup>
+	
+</Project>

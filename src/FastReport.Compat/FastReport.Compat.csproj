@@ -12,10 +12,11 @@
     <OutputPath>$(BaseOutputPath)\build\lib</OutputPath>
   </PropertyGroup>
 
+  <Import Project="$(SlnDir)UsedPackages.version"/>
   <ItemGroup>
-    <PackageReference Include="System.Drawing.Common" Version="[4.6.0,)" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="[3.3.0,)" />
-    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="[3.3.0,)" />
+    <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(CodeAnalysisCSharpVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="$(CodeAnalysisVisualBasicVersion)" />
   </ItemGroup>
     
   <ItemGroup Condition="'$(TargetFramework)'=='netcoreapp3.0'">
