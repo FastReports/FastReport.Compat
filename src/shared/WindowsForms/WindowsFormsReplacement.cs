@@ -688,7 +688,7 @@ namespace System.Windows.Forms
             get { return _parent; }
             set {
                 _parent = value;
-                _parent.Controls.Add(this);
+                _parent?.Controls.Add(this);
             }
         }
         public List<Control> Controls = new List<Control>();
