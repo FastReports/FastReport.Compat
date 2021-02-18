@@ -27,8 +27,6 @@ namespace FastReport.Code.CodeDom.Compiler
                 "System.ComponentModel.Primitives",
                 "System.Core",
                 "System.Data.Common",
-                "System.Drawing",
-                "System.Drawing.Primitives",
                 "System.Drawing.Common",
                 "System.Globalization",
                 "System.IO",
