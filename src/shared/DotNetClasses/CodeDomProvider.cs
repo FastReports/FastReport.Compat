@@ -9,7 +9,7 @@ namespace FastReport.Code.CodeDom.Compiler
 {
     public abstract class CodeDomProvider : IDisposable
     {
-        static Dictionary<string, string> cache = new Dictionary<string, string>();
+        static readonly Dictionary<string, string> cache = new Dictionary<string, string>();
 
         public abstract void Dispose();
         public abstract CompilerResults CompileAssemblyFromSource(CompilerParameters cp, string v);
@@ -18,10 +18,26 @@ namespace FastReport.Code.CodeDom.Compiler
         {
 
             string[] assemblies = new[] {
+                "mscorlib",
                 "netstandard",
-                "System.Runtime",
+                "System.Collections.Concurrent",
+                "System.Collections",
+                "System.Collections.NonGeneric",
+                "System.Collections.Specialized",
                 "System.ComponentModel.Primitives",
-                "System.Drawing.Common"
+                "System.Core",
+                "System.Data.Common",
+                "System.Drawing.Common",
+                "System.Globalization",
+                "System.IO",
+                "System.Linq",
+                "System.Linq.Expressions",
+                "System.Linq.Parallel",
+                "System.Linq.Queryable",
+                "System.Numerics",
+                "System.Runtime",
+                "System.Text.Encoding",
+                "System.Text.RegularExpressions"
             };
 
             foreach(string assembly in assemblies)
@@ -62,11 +78,41 @@ namespace FastReport.Code.CodeDom.Compiler
                 string ass = reference;
                 if (reference.ToLower().EndsWith(".dll"))
                     ass = reference.Substring(0, reference.Length - 4);
-                cache[refDll] = Assembly.Load(new AssemblyName(ass)).Location;
-                return MetadataReference.CreateFromFile(cache[refDll]);
+                string location = Assembly.Load(new AssemblyName(ass)).Location;
+                cache[refDll] = location;
+                return MetadataReference.CreateFromFile(location);
             }
 
         }
+
+        //public IEnumerable<MetadataReference> GetReferences(string[] refsDll)
+        //{
+        //    MetadataReference result;
+        //    AssemblyName[] executingAssemblyReferences = Assembly.GetExecutingAssembly().GetReferencedAssemblies();
+
+        //    foreach (string refDll in refsDll)
+        //    {
+        //        string reference = refDll;
+
+        //        if (cache.ContainsKey(refDll))
+        //            yield return MetadataReference.CreateFromFile(cache[refDll]);
+
+        //        foreach (AssemblyName name in executingAssemblyReferences)
+        //        {
+        //            if (name.Name == reference
+        //                || reference.ToLower().EndsWith(".dll")
+        //                && name.Name == reference.Substring(0, reference.Length - 4))
+        //            {
+        //                result = MetadataReference.CreateFromFile(
+        //                    Assembly.Load(name).Location);
+        //                cache[refDll] = reference;
+        //                yield return result;
+        //            }
+
+        //        }
+        //    }
+
+        //}
     }
 }
 #endif
