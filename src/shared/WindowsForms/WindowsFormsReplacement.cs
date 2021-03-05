@@ -1,5 +1,3 @@
-#if !NETFRAMEWORK && !NETCOREWIN
-
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -879,57 +877,205 @@ namespace System.Windows.Forms
         }
     }
 
-    public class ListControl : Control
+    public abstract class ListControl : Control
     {
-        public class ObjectCollection : List<object> { }
 
         public event EventHandler SelectedIndexChanged;                                     //
         public event MeasureItemEventHandler MeasureItem;
         public event DrawItemEventHandler DrawItem;
 
-        public bool Sorted;
+        //public bool Sorted;
         public DrawMode DrawMode;
         public int ItemHeight;
-        public ObjectCollection Items = new ObjectCollection();                             //
-        private int selectedIndex;
 
-        public virtual int SelectedIndex {
-            get { return selectedIndex; }
-            set {
-                selectedIndex = value;
-                SelectedItem = Items[value];
-                Text = SelectedItem.ToString();
-            }
+        public abstract int SelectedIndex { get; set; }
+
+        public string GetItemText(object item)
+        {
+            // if we did not do any work then return the old ItemText
+            return Convert.ToString(item, CultureInfo.CurrentCulture);
         }
-        public object SelectedItem { get; set; }
     }
 
-    public class ListBox : ListControl
+    public partial class ListBox : ListControl
     {
-        public class SelectedIndexCollection : List<int> { }
-        public class SelectedObjectCollection : List<object> { }
-
         public bool IntegralHeight;
         public int ColumnWidth;
         public bool MultiColumn;
-        public SelectionMode SelectionMode;
+        public SelectionMode SelectionMode = SelectionMode.One;
         public bool UseTabStops;
-        public SelectedIndexCollection SelectedIndices = new SelectedIndexCollection();
-        public SelectedObjectCollection SelectedItems = new SelectedObjectCollection();
+        bool sorted = false;
+        ObjectCollection itemsCollection;
+        SelectedIndexCollection selectedIndices;
+        SelectedObjectCollection selectedItems;
 
         protected override Size DefaultSize {
             get {
                 return new Size(120, 96);
             }
         }
+
+        public bool Sorted
+        {
+            get
+            {
+                return sorted;
+            }
+            set
+            {
+                if (sorted != value)
+                {
+                    sorted = value;
+                }
+            }
+        }
+        public ObjectCollection Items
+        {
+            get
+            {
+                if (itemsCollection == null)
+                {
+                    itemsCollection = new ObjectCollection(this);
+                }
+                return itemsCollection;
+            }
+        }
+
+        public override int SelectedIndex
+        {
+            get
+            {
+                if (itemsCollection != null && SelectedItems.Count > 0)
+                {
+                    return Items.IndexOfIdentifier(SelectedItems.GetObjectAt(0));
+                }
+
+                return -1;
+            }
+            set
+            {
+                int itemCount = (itemsCollection is null) ? 0 : itemsCollection.Count;
+
+                if (value < -1 || value >= itemCount)
+                {
+                    throw new ArgumentOutOfRangeException();
+                }
+
+                if (SelectionMode == SelectionMode.One && value != -1)
+                {
+                    // Single select an individual value.
+                    int currentIndex = SelectedIndex;
+
+                    if (currentIndex != value)
+                    {
+                        if (currentIndex != -1)
+                        {
+                            SelectedItems.SetSelected(currentIndex, false);
+                        }
+                        SelectedItems.SetSelected(value, true);
+                    }
+                }
+                else if (value == -1)
+                {
+                    if (SelectedIndex != -1)
+                    {
+                        ClearSelected();
+                        // ClearSelected raises OnSelectedIndexChanged for us
+                    }
+                }
+                else
+                {
+                    if (!SelectedItems.GetSelected(value))
+                    {
+                        SelectedItems.SetSelected(value, true);
+                    }
+                }
+            }
+        }
+
+        public object SelectedItem
+        {
+            get
+            {
+                if (SelectedItems.Count > 0)
+                {
+                    return SelectedItems[0];
+                }
+
+                return null;
+            }
+            set
+            {
+                if (itemsCollection != null)
+                {
+                    if (value != null)
+                    {
+                        int index = itemsCollection.IndexOf(value);
+                        if (index != -1)
+                        {
+                            SelectedIndex = index;
+                        }
+                    }
+                    else
+                    {
+                        SelectedIndex = -1;
+                    }
+                }
+            }
+        }
+
+        public SelectedObjectCollection SelectedItems
+        {
+            get
+            {
+                if (selectedItems is null)
+                {
+                    selectedItems = new SelectedObjectCollection(this);
+                }
+                return selectedItems;
+            }
+        }
+
+        public SelectedIndexCollection SelectedIndices
+        {
+            get
+            {
+                if (selectedIndices is null)
+                {
+                    selectedIndices = new SelectedIndexCollection(this);
+                }
+                return selectedIndices;
+            }
+        }
+
+        public void ClearSelected()
+        {
+            int itemCount = (itemsCollection is null) ? 0 : itemsCollection.Count;
+            for (int x = 0; x < itemCount; x++)
+            {
+                if (SelectedItems.GetSelected(x))
+                {
+                    SelectedItems.SetSelected(x, false);
+                }
+            }
+        }
+
+        public void SetSelected(int index, bool value)
+        {
+            SelectedItems.SetSelected(index, value);
+            SelectedItems.Dirty();
+        }
     }
 
-    public class ComboBox : ListControl
+    public partial class ComboBox : ListControl
     {
+        private int selectedIndex = -1;
+        private ObjectCollection _itemsCollection;
         public ComboBoxStyle DropDownStyle;
         public int DropDownWidth;
         public int DropDownHeight;
         public int MaxDropDownItems;
+        private bool sorted;
         public object Tag;
 
         protected override Size DefaultSize {
@@ -937,6 +1083,97 @@ namespace System.Windows.Forms
                 return new Size(121,
                     21);    // Approximate value, may be incorrect
             }
+        }
+
+        public bool Sorted
+        {
+            get
+            {
+                return sorted;
+            }
+            set
+            {
+                if (sorted != value)
+                {
+                    sorted = value;
+                    SelectedIndex = -1;
+                }
+            }
+        }
+        public ObjectCollection Items
+        {
+            get
+            {
+                if (_itemsCollection == null)
+                {
+                    _itemsCollection = new ObjectCollection(this);
+                }
+                return _itemsCollection;
+            }
+        }
+
+        public override int SelectedIndex
+        {
+            get
+            {
+                return selectedIndex;
+            }
+            set
+            {
+                if (SelectedIndex != value)
+                {
+                    selectedIndex = value;
+
+                    UpdateText();
+                }
+            }
+        }
+
+        public object SelectedItem 
+        {
+            get
+            {
+                int index = SelectedIndex;
+                return (index == -1) ? null : Items[index];
+            }
+            set
+            {
+                int x = -1;
+
+                if (_itemsCollection != null)
+                {
+                    //
+                    if (value != null)
+                    {
+                        x = _itemsCollection.IndexOf(value);
+                    }
+                    else
+                    {
+                        SelectedIndex = -1;
+                    }
+                }
+
+                if (x != -1)
+                {
+                    SelectedIndex = x;
+                }
+            }
+        }
+
+        private void UpdateText()
+        {
+            string s = null;
+
+            if (SelectedIndex != -1)
+            {
+                object item = Items[SelectedIndex];
+                if (item != null)
+                {
+                    s = item.ToString();
+                }
+            }
+
+            Text = s;
         }
     }
 
@@ -1160,5 +1397,3 @@ namespace System.Windows.Forms
 
 #pragma warning restore FR0000 // Field must be texted in lowerCamelCase.
 #pragma warning restore 1591
-
-#endif
