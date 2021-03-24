@@ -1,12 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net40;netcoreapp3.0;net5.0-windows7.0;$(CustomTargetFrameworks)</TargetFrameworks>
+    <TargetFrameworks>net40;$(CustomTargetFrameworks)</TargetFrameworks>
     <DefineConstants>$(DefineConstants);NETCOREWIN</DefineConstants>
     <AssemblyName>FastReport.Compat</AssemblyName>
     <PackageId>$(AssemblyName)</PackageId>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(VisualStudioVersion)' >= '16'">
+    <TargetFrameworks>$(TargetFrameworks);netcoreapp3.0;net5.0-windows7.0;</TargetFrameworks>
+  </PropertyGroup>
+
+  <!--Explicit import Directory.Build.props (for old-style csproj)-->
+  <Import Project="..\..\Directory.Build.props" Condition="'$(UsingMicrosoftNETSdk)' != 'true'"/>
 
   <PropertyGroup Condition="'$(TargetFramework)'!='netcoreapp3.0'">
     <OutputPath>$(BaseOutputPath)\lib</OutputPath>
