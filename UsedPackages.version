@@ -5,9 +5,9 @@
 
         <SystemDrawingCommonVersion>[4.6.0,)</SystemDrawingCommonVersion>
 
-        <CodeAnalysisCSharpVersion>[3.3.0,)</CodeAnalysisCSharpVersion>
+        <CodeAnalysisCSharpVersion>[3.3.1,)</CodeAnalysisCSharpVersion>
 
-        <CodeAnalysisVisualBasicVersion>[3.3.0,)</CodeAnalysisVisualBasicVersion>
+        <CodeAnalysisVisualBasicVersion>[3.3.1,)</CodeAnalysisVisualBasicVersion>
 		
     </PropertyGroup>
 	
