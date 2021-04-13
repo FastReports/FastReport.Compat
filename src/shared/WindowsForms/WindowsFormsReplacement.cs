@@ -1305,7 +1305,7 @@ namespace System.Windows.Forms
         public bool AcceptsReturn;
         public bool AcceptsTab;
         public CharacterCasing CharacterCasing;
-        public int MaxLength;
+        public int MaxLength = 32767;
         public bool Multiline = false;                                                      //
         public bool ReadOnly;
         public ScrollBars ScrollBars;
