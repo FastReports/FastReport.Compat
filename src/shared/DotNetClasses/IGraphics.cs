@@ -65,7 +65,6 @@ namespace FastReport
         void DrawPolygon(Pen pen, Point[] points);
         void DrawRectangle(Pen pen, float left, float top, float width, float height);
         void DrawRectangle(Pen pen, Rectangle rectangle);
-        void PathAddRectangle(GraphicsPath path, RectangleF rect);
         #endregion
 
         #region Fill geometry
