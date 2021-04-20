@@ -5,6 +5,7 @@
     <DefineConstants>$(DefineConstants);NETCOREWIN</DefineConstants>
     <AssemblyName>FastReport.Compat</AssemblyName>
     <PackageId>$(AssemblyName)</PackageId>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(VisualStudioVersion)' >= '16'">
@@ -19,7 +20,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)'=='netcoreapp3.0'">
-    <OutDir>$(BaseOutputPath)\build\lib\$(TargetFramework)-Win</OutDir>
+    <OutDir>$(BaseOutputPath)\build\$(TargetFramework)\lib\Win</OutDir>
   </PropertyGroup>
 
   <Import Project="$(SlnDir)UsedPackages.version"/>

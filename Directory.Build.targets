@@ -4,12 +4,12 @@
   <Target Name="PrepareCompatPackage">
 
       <!-- Copy runtime libraries for .Net Core 3 -->
-    <Copy SourceFiles="$(BaseOutputPath)build\lib\netcoreapp3.0\$(PackageId).dll"
+    <Copy SourceFiles="$(BaseOutputPath)build\netcoreapp3.0\lib\Any\$(PackageId).dll"
           DestinationFolder="$(BaseOutputPath)runtimes\any\lib\netcoreapp3.0"/>
 
       <!-- Copy *.targets for nuget pack -->
     <Copy SourceFiles="$(SlnDir)\Nuget\FastReport.Compat.targets"
-          DestinationFolder="$(BaseOutputPath)\build"/>
+          DestinationFolder="$(BaseOutputPath)\build\netcoreapp3.0"/>
 
       <!-- Copy resources for nuget pack -->
     <Copy SourceFiles="$(SlnDir)\frlogo-big.png;$(SlnDir)\LICENSE.md"
