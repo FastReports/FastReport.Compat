@@ -6,9 +6,10 @@ using Path = System.IO.Path;
 
 #region Constants
 
-string Prepare = "Prepare";
-string PrepareNuget = "Prepare-Nuget";
-string Default = "Default";
+const string Init = "Init";
+const string Prepare = "Prepare";
+const string PrepareNuget = "Prepare-Nuget";
+const string Default = "Default";
 
 #endregion
 
@@ -23,8 +24,29 @@ string outdir = Argument("out-dir", "");
 
 #endregion Arguments
 
+#region Fields
+
+bool IsDemo = false;
+bool IsRelease = true;
+bool IsDebug = false;
+
+#endregion
+
+#region Init
+
+Task(Init)
+  .Does(() =>
+  {
+    IsDebug = config.ToLower() == "debug";
+    IsDemo = config.ToLower() == "demo";
+    IsRelease = config.ToLower() == "release";
+  });
+
+#endregion
+
 #region Prepare
 Task(Prepare)
+  .IsDependentOn(Init)
   .Does(() =>
   {
 
@@ -107,7 +129,12 @@ Task("Compat")
     string solutionFile = Path.Combine(solutionDirectory, solutionFilename);
     string usedPackagesVersionPath = Path.Combine(solutionDirectory, "UsedPackages.version");
 
-    string nugetDir = Path.Combine(solutionDirectory, "bin", "nuget");
+    string nugetDir;
+    if(IsRelease)
+      nugetDir = Path.Combine(solutionDirectory, "bin", "nuget");
+    else
+      nugetDir = Path.Combine(solutionDirectory, "bin", config);
+    
     // Clean nuget directory for package
     if (DirectoryExists(nugetDir))
     {

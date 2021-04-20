@@ -1,19 +1,22 @@
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Choose>
-    <When Condition="'$(TargetFrameworkIdentifier)'=='.NETCoreApp' And '$(TargetFrameworkVersion[1])'>='3'">
-      <!-- <_MicrosoftNetSdkWindowsDesktop> property is declared in Microsoft.NET.Sdk.WindowsDesktop.props when using WindowsDesktop SDK  -->
-      <PropertyGroup Condition="'$(_MicrosoftNetSdkWindowsDesktop)' == ''">
-        <_MicrosoftNetSdkWindowsDesktop>false</_MicrosoftNetSdkWindowsDesktop>
-      </PropertyGroup>
-      <PropertyGroup Condition="'$(UseWindowsForms)' == ''">
-        <UseWindowsForms>false</UseWindowsForms>
-      </PropertyGroup>
-      <ItemGroup Condition="(!$(_MicrosoftNetSdkWindowsDesktop) Or !$(UseWindowsForms)) And !('$(TargetFrameworkVersion[1])'>='5' And '$(TargetPlatformIdentifier)'=='Windows')">
-        <Reference Include="$(MSBuildThisFileDirectory)lib\netcoreapp3.0\FastReport.Compat.dll" />
-      </ItemGroup>
-      <ItemGroup Condition="$(_MicrosoftNetSdkWindowsDesktop) And $(UseWindowsForms) And '$(TargetFrameworkVersion[1])'=='3'">
-        <Reference Include="$(MSBuildThisFileDirectory)lib\netcoreapp3.0-Win\FastReport.Compat.dll" />
-      </ItemGroup>
-    </When>
-  </Choose>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" InitialTargets="_FR_Compat_INIT">
+
+  <Target Name="_FR_Compat_INIT" Condition="$(_frDebug) != '' And $(_frDebug) == 'true'">
+    <Message Importance="high" Text="FastReport.Compat initialize target"/>
+    <Message Importance="high" Text="_MicrosoftNetSdkWindowsDesktop: $(_MicrosoftNetSdkWindowsDesktop)"/>
+    <Message Importance="high" Text="UseWindowsForms: $(UseWindowsForms)"/>
+  </Target>
+
+  <!-- <_MicrosoftNetSdkWindowsDesktop> property is declared in Microsoft.NET.Sdk.WindowsDesktop.props when using WindowsDesktop SDK  -->
+  <PropertyGroup Condition="'$(_MicrosoftNetSdkWindowsDesktop)' == ''">
+    <_MicrosoftNetSdkWindowsDesktop>false</_MicrosoftNetSdkWindowsDesktop>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(UseWindowsForms)' == ''">
+    <UseWindowsForms>false</UseWindowsForms>
+  </PropertyGroup>
+  <ItemGroup Condition="(!$(_MicrosoftNetSdkWindowsDesktop) Or !$(UseWindowsForms)) And !('$(TargetFrameworkVersion[1])'>='5' And '$(TargetPlatformIdentifier)'=='Windows')">
+    <Reference Include="$(MSBuildThisFileDirectory)lib\Any\FastReport.Compat.dll" />
+  </ItemGroup>
+  <ItemGroup Condition="$(_MicrosoftNetSdkWindowsDesktop) And $(UseWindowsForms) And '$(TargetFrameworkVersion[1])'=='3'">
+    <Reference Include="$(MSBuildThisFileDirectory)lib\Win\FastReport.Compat.dll" />
+  </ItemGroup>
 </Project>

@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)'=='netcoreapp3.0'">
-    <OutputPath>$(BaseOutputPath)\build\lib</OutputPath>
+    <OutDir>$(BaseOutputPath)\build\$(TargetFramework)\lib\Any</OutDir>
   </PropertyGroup>
 
   <Import Project="$(SlnDir)UsedPackages.version"/>
