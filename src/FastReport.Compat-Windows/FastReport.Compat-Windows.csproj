@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net40;$(CustomTargetFrameworks)</TargetFrameworks>
     <DefineConstants>$(DefineConstants);NETCOREWIN</DefineConstants>
+    <UseWindowsForms>true</UseWindowsForms>
     <AssemblyName>FastReport.Compat</AssemblyName>
     <PackageId>$(AssemblyName)</PackageId>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
@@ -25,9 +26,12 @@
 
   <Import Project="$(SlnDir)UsedPackages.version"/>
   <ItemGroup Condition="'$(TargetFramework)'!='net40'">
-    <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(CodeAnalysisCSharpVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="$(CodeAnalysisVisualBasicVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'=='netcoreapp3.0'">
+    <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonVersion)" />
     <PackageReference Include="System.Windows.Extensions" Version="4.6.0"/>
   </ItemGroup>
 

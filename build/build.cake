@@ -163,7 +163,10 @@ Task("Compat")
 
     var dependencies = new List<NuSpecDependency>();
     AddNuSpecDep(null, null, ".NETFramework4.0");
-    AddNuSpecDepCore("System.Drawing.Common", SystemDrawingCommonVersion);
+    // System.Drawing.Common reference doesn't included in net5.0-windows target
+    AddNuSpecDep("System.Drawing.Common", SystemDrawingCommonVersion, ".NETStandard2.0");
+    AddNuSpecDep("System.Drawing.Common", SystemDrawingCommonVersion, ".NETStandard2.1");
+    AddNuSpecDep("System.Drawing.Common", SystemDrawingCommonVersion, tfmCore30);
     AddNuSpecDepCore("Microsoft.CodeAnalysis.CSharp", CodeAnalysisCSharpVersion);
     AddNuSpecDepCore("Microsoft.CodeAnalysis.VisualBasic", CodeAnalysisVisualBasicVersion);
     AddNuSpecDep("System.Windows.Extensions", "4.6.0", tfmCore30);
@@ -196,7 +199,7 @@ Task("Compat")
     };
 
     // Pack
-    NuGetPack(nuGetPackSettings);
+    NuGetPack(Path.Combine(solutionDirectory, "Nuget", nuGetPackSettings.Id + ".nuspec"), nuGetPackSettings);
 
     // Local functions:
 
