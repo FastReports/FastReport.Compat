@@ -12,7 +12,7 @@
           DestinationFolder="$(BaseOutputPath)\build\netcoreapp3.0"/>
 
       <!-- Copy resources for nuget pack -->
-    <Copy SourceFiles="$(SlnDir)\frlogo-big.png;$(SlnDir)\LICENSE.md"
+    <Copy SourceFiles="$(SlnDir)\frlogo192.png;$(SlnDir)\LICENSE.md"
           DestinationFolder="$(BaseOutputPath)"/>
 
     <Copy SourceFiles="$(SlnDir)\Nuget\_._"
