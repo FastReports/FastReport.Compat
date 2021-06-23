@@ -41,7 +41,7 @@ namespace FastReport.Code.VisualBasic
                 references: references, options: options.WithEmbedVbCoreRuntime(true)
                 );
 
-
+            OnBeforeEmitCompilation(compilation);
 
             using (MemoryStream ms = new MemoryStream())
             {

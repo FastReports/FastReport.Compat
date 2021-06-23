@@ -33,13 +33,13 @@ namespace FastReport.Code.CSharp
 
             AddExtraAssemblies(cp.ReferencedAssemblies, references);
 
-
             Compilation compilation = CSharpCompilation.Create(
                 "_" + Guid.NewGuid().ToString("D"), new SyntaxTree[] { codeTree },
                 references: references, options: options
                 );
-            
 
+
+            OnBeforeEmitCompilation(compilation);
 
             using (MemoryStream ms = new MemoryStream())
             {
