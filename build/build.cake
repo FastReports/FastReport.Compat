@@ -129,11 +129,7 @@ Task("Compat")
     string solutionFile = Path.Combine(solutionDirectory, solutionFilename);
     string usedPackagesVersionPath = Path.Combine(solutionDirectory, "UsedPackages.version");
 
-    string nugetDir;
-    if(IsRelease)
-      nugetDir = Path.Combine(solutionDirectory, "bin", "nuget");
-    else
-      nugetDir = Path.Combine(solutionDirectory, "bin", config);
+    string nugetDir = Path.Combine(solutionDirectory, "bin", IsRelease ? "nuget": config);
     
     // Clean nuget directory for package
     if (DirectoryExists(nugetDir))
@@ -183,7 +179,7 @@ Task("Compat")
         Description             = "Common compatible types for FastReport .Net, Core and Mono",
         Repository              = new NuGetRepository{Type = "GIT", Url = "https://github.com/FastReports/FastReport.Compat"},
         ProjectUrl              = new Uri("https://www.fast-report.com/en/product/fast-report-net"),
-        Icon                    = "frlogo-big.png",  // Property Icon available since Cake 1.0
+        Icon                    = "frlogo192.png",  // Property Icon available since Cake 1.0
         IconUrl                 = new Uri("https://raw.githubusercontent.com/FastReports/FastReport.Compat/master/frlogo-big.png"),
         ReleaseNotes            = new[] { "See the latest changes on https://github.com/FastReports/FastReport.Compat"},
         License                 = new NuSpecLicense {Type = "file", Value = "LICENSE.md"},
