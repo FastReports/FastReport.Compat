@@ -9,10 +9,12 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)'=='netcoreapp3.0'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    
     <OutDir>$(BaseOutputPath)\build\$(TargetFramework)\lib\Any</OutDir>
   </PropertyGroup>
 
-  <Import Project="$(SlnDir)UsedPackages.version"/>
+  <Import Project="$(SlnDir)UsedPackages.version" />
   <ItemGroup>
     <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(CodeAnalysisCSharpVersion)" />

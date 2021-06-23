@@ -20,6 +20,10 @@
     <OutputPath>$(BaseOutputPath)\lib</OutputPath>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(TargetFramework)'!='net40'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(TargetFramework)'=='netcoreapp3.0'">
     <OutDir>$(BaseOutputPath)\build\$(TargetFramework)\lib\Win</OutDir>
   </PropertyGroup>
