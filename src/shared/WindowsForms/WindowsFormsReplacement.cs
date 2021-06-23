@@ -1356,6 +1356,15 @@ namespace System.Windows.Forms
         }
     }
 
+    public class BaseForm : Form
+    {
+        public event EventHandler DpiChanged;
+        public virtual void UpdateDpiDependencies()
+        {
+        }
+    }
+
+
     public class Timer : Component
     {
         public event EventHandler Tick;
