@@ -1354,7 +1354,6 @@ namespace System.Windows.Forms
         public SizeF AutoScaleDimensions;
         public AutoScaleMode AutoScaleMode;
 
-
         public DialogResult ShowDialog()
         {
             return DialogResult.OK;
@@ -1372,6 +1371,16 @@ namespace System.Windows.Forms
 
         public void ResumeLayout()
         {
+        }
+
+        public int Dpi()
+        {
+            return 96;
+        }
+
+        public float FontDpiMultiplier()
+        {
+            return 1f;
         }
 
     }
