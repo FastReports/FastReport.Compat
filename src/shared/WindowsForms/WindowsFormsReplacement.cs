@@ -1326,6 +1326,14 @@ namespace System.Windows.Forms
 
     }
 
+	public enum AutoScaleMode
+    {
+        None = 0,
+        Font = 1,
+        Dpi = 2,
+        Inherit = 3
+    }
+
     public class Form : Control
     {
         public event EventHandler Load;
@@ -1343,6 +1351,8 @@ namespace System.Windows.Forms
         public bool MinimizeBox;
         public bool MaximizeBox;
         public DialogResult DialogResult;
+        public SizeF AutoScaleDimensions;
+        public AutoScaleMode AutoScaleMode;
 
         public DialogResult ShowDialog()
         {
@@ -1354,6 +1364,25 @@ namespace System.Windows.Forms
                 return new Size(300, 300);
             }
         }
+
+        public void SuspendLayout()
+        {
+        }
+
+        public void ResumeLayout()
+        {
+        }
+
+        public int Dpi()
+        {
+            return 96;
+        }
+
+        public float FontDpiMultiplier()
+        {
+            return 1f;
+        }
+
     }
 
     public class BaseForm : Form
