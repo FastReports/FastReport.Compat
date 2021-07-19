@@ -23,16 +23,16 @@ namespace FastReport.TypeConverters
     {
         private const string StylePrefix = "style=";
 
+        [Obsolete]
         public static FontConverter Instance = new FontConverter();
-        private static PrivateFontCollection privateFontCollection = new PrivateFontCollection();
 
         /// <summary>
         /// Gets a PrivateFontCollection instance.
         /// </summary>
         public static PrivateFontCollection PrivateFontCollection
         {
-          get { return privateFontCollection; }
-        }
+            get;
+        } = new PrivateFontCollection();
 
         /// <inheritdoc/>
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
@@ -235,15 +235,18 @@ namespace FastReport.TypeConverters
             Font result = new Font(fontName, fontSize, fontStyle, units);
             if (result.Name != fontName)
             {
-              // font family not found in installed fonts, search in the user fonts
-              foreach (FontFamily f in PrivateFontCollection.Families)
-              {
-                if (String.Compare(fontName, f.Name, true) == 0)
+                // font family not found in installed fonts, search in the user fonts
+                lock(PrivateFontCollection)
                 {
-                  result = new Font(f, fontSize, fontStyle, units);
-                  break;
+                    foreach (FontFamily f in PrivateFontCollection.Families)
+                    {
+                        if (String.Compare(fontName, f.Name, true) == 0)
+                        {
+                            result = new Font(f, fontSize, fontStyle, units);
+                            break;
+                        }
+                    }
                 }
-              }
             }
 
             return result;
