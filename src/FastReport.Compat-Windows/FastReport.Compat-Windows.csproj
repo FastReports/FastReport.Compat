@@ -41,6 +41,7 @@
 
   <ItemGroup>
     <Compile Remove="$(SourceCode)\WindowsForms\**\*.cs"/>
+    <Compile Remove="$(SourceCode)\DotNetClasses\UITypeEditor.cs"/>
   </ItemGroup>
   
 </Project>
