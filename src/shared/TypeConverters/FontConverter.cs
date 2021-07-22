@@ -22,6 +22,7 @@ namespace FastReport.TypeConverters
     public class FontConverter : TypeConverter
     {
         private const string StylePrefix = "style=";
+        private static readonly object fontCollectionLocker = new object();
 
         [Obsolete]
         public static FontConverter Instance = new FontConverter();
@@ -61,7 +62,8 @@ namespace FastReport.TypeConverters
 
                     StringBuilder sb = new StringBuilder();
                     sb.Append(font.Name);
-                    sb.Append(culture.TextInfo.ListSeparator[0] + " ");
+                    sb.Append(culture.TextInfo.ListSeparator[0]);
+                    sb.Append(' ');
                     sb.Append(font.Size.ToString(culture.NumberFormat));
 
                     switch (font.Unit)
@@ -100,7 +102,8 @@ namespace FastReport.TypeConverters
 
                     if (font.Style != FontStyle.Regular)
                     {
-                        sb.Append(culture.TextInfo.ListSeparator[0] + " style=");
+                        sb.Append(culture.TextInfo.ListSeparator[0]);
+                        sb.Append(" style=");
                         sb.Append(font.Style.ToString());
                     }
 
@@ -236,7 +239,7 @@ namespace FastReport.TypeConverters
             if (result.Name != fontName)
             {
                 // font family not found in installed fonts, search in the user fonts
-                lock(PrivateFontCollection)
+                lock(fontCollectionLocker)
                 {
                     foreach (FontFamily f in PrivateFontCollection.Families)
                     {
