@@ -28,13 +28,7 @@ namespace FastReport.Code.VisualBasic
             List<MetadataReference> references = new List<MetadataReference>();
 
 
-            foreach (string reference in cp.ReferencedAssemblies)
-                references.Add(GetReference(reference));
-
-            AddExtraAssemblies(cp.ReferencedAssemblies, references);
-
-
-
+            AddReferences(cp, references);
 
             Compilation compilation = VisualBasicCompilation.Create(
                 "_" + Guid.NewGuid().ToString("D"), new SyntaxTree[] { codeTree },

@@ -19,6 +19,16 @@ namespace FastReport.Code.CSharp
 
         public override CompilerResults CompileAssemblyFromSource(CompilerParameters cp, string code)
         {
+#if DEBUG
+            Console.WriteLine("FR.Compat: " +
+#if NETSTANDARD
+                "NETSTANDARD"
+#elif NETCOREAPP
+                "NETCOREAPP"
+#endif
+                );
+#endif
+
             SyntaxTree codeTree = CSharpSyntaxTree.ParseText(code);
             CSharpCompilationOptions options = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary,
                 optimizationLevel: OptimizationLevel.Release,
@@ -27,11 +37,8 @@ namespace FastReport.Code.CSharp
 
             List<MetadataReference> references = new List<MetadataReference>();
 
+            AddReferences(cp, references);
 
-            foreach (string reference in cp.ReferencedAssemblies)
-                references.Add(GetReference(reference));
-
-            AddExtraAssemblies(cp.ReferencedAssemblies, references);
 
             Compilation compilation = CSharpCompilation.Create(
                 "_" + Guid.NewGuid().ToString("D"), new SyntaxTree[] { codeTree },
