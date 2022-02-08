@@ -89,6 +89,7 @@ namespace FastReport.Code.CodeDom.Compiler
                 "System.Collections",
                 "System.Collections.NonGeneric",
                 "System.Collections.Specialized",
+                "System.ComponentModel",
                 "System.ComponentModel.Primitives",
                 "System.Core",
                 "System.Data.Common",
