@@ -8,6 +8,6 @@ rem that's all
 
 ECHO TRY TO BUILD FR.Compat
 
-pushd .\build
-   Powershell -ExecutionPolicy ByPass -File ".\build.ps1" --target=Compat --solution-filename=FastReport.Compat.sln --config=Release  --vers=2021.2.10
+pushd .\build\Cake
+   dotnet run --target=PackCompat --solution-filename=FastReport.Compat.sln --config=Release --vers=2021.3.1
 popd
