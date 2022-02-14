@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Runtime.Loader;
 using System.Text;
 using FastReport.Code.CodeDom.Compiler;
 
@@ -42,9 +43,26 @@ namespace FastReport.Code.VisualBasic
                 EmitResult results = compilation.Emit(ms);
                 if (results.Success)
                 {
+                    ms.Seek(0, SeekOrigin.Begin);
+                    var compiledAssembly = ms.ToArray();                
+                    Assembly assembly;
+                    using (var asm = new MemoryStream(compiledAssembly))
+                    {
+                        if (AssemblyLoadContext.CurrentContextualReflectionContext != null)
+                        {
+                            assembly =
+                                AssemblyLoadContext.CurrentContextualReflectionContext.LoadFromStream(asm);
+                        }
+                        else
+                        {
+                            assembly = AssemblyLoadContext.Default.LoadFromStream(asm);
+                        }
+                    }
+
+                    // assembly = Assembly.Load(ms.ToArray());
                     return new CompilerResults()
                     {
-                        CompiledAssembly = Assembly.Load(ms.ToArray())
+                        CompiledAssembly = assembly
                     };
                 }
                 else
