@@ -2,6 +2,7 @@
 <Project>
 <!-- This group sets version used packages in FastReport.Compat and package -->
     <PropertyGroup>
+        <FastReportDrawingVersion>2022.3.0</FastReportDrawingVersion>
 
         <SystemDrawingCommonVersion>[4.6.0,)</SystemDrawingCommonVersion>
 

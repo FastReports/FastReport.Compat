@@ -1,34 +1,43 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0</TargetFrameworks>
-    <UseSkia>true</UseSkia>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;netcoreapp3.1</TargetFrameworks>
+
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+    <UseSkia>false</UseSkia>
+
+    <!--If 'true' then excludes FastReport.Drawing.Skia package and adds reference to local source code-->
+    <DebugFRDrawing>true</DebugFRDrawing>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)'!='netcoreapp3.0'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  <PropertyGroup Condition="$(UseSkia)">
+    <DefineConstants>$(DefineConstants);SKIA;</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)'!='netcoreapp3.1'">
     <OutputPath>$(BaseOutputPath)\lib</OutputPath>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)'=='netcoreapp3.0'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    
+  <PropertyGroup Condition="'$(TargetFramework)'=='netcoreapp3.1'">
     <OutDir>$(BaseOutputPath)\build\$(TargetFramework)\lib\Any</OutDir>
   </PropertyGroup>
 
   <Import Project="$(SlnDir)UsedPackages.version" />
+
   <ItemGroup>
+    <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonVersion)" Condition="!$(UseSkia)" />
+    <PackageReference Include="FastReport.Drawing.Skia" Version="$(FastReportDrawingVersion)" Condition="$(UseSkia) And !$(DebugFRDrawing)" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(CodeAnalysisCSharpVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="$(CodeAnalysisVisualBasicVersion)" />
-    <PackageReference Condition="$(UseSkia) == false" Include="System.Drawing.Common" Version="5.0.0" />
   </ItemGroup>
     
-  <ItemGroup Condition="'$(TargetFramework)'=='netcoreapp3.0'">
+  <ItemGroup Condition="'$(TargetFramework)'=='netcoreapp3.1'">
     <PackageReference Include="System.Windows.Extensions" Version="4.6.0" />
   </ItemGroup>
-    
-  <ItemGroup>
-    <ProjectReference Condition="$(UseSkia) == true" Include="..\..\..\My repositories\FastReport.Drawing\FastReport.Drawing\FastReport.Drawing.csproj" />
+
+  <ItemGroup Condition="$(UseSkia) And $(DebugFRDrawing)">
+    <ProjectReference Include="..\..\..\FastReport.Drawing.Skia\src\FastReport.Drawing.Skia.csproj" />
   </ItemGroup>
   
 </Project>
