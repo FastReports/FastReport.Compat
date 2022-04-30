@@ -51,7 +51,6 @@ namespace CakeScript
             AddNuSpecDepCore("FastReport.Drawing.Skia", FastReportDrawingVersion);
             AddNuSpecDepCore("Microsoft.CodeAnalysis.CSharp", CodeAnalysisCSharpVersion);
             AddNuSpecDepCore("Microsoft.CodeAnalysis.VisualBasic", CodeAnalysisVisualBasicVersion);
-            AddNuSpecDep("System.Windows.Extensions", "4.6.0", tfmCore31);
 
             var files = new[] {
                new NuSpecContent{Source = Path.Combine(nugetDir, "**", "*.*"), Target = ""},

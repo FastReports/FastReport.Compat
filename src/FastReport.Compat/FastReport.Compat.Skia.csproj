@@ -28,10 +28,6 @@
     <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="$(CodeAnalysisVisualBasicVersion)" />
   </ItemGroup>
     
-  <ItemGroup Condition="'$(TargetFramework)'=='netcoreapp3.1'">
-    <PackageReference Include="System.Windows.Extensions" Version="4.6.0" />
-  </ItemGroup>
-
   <ItemGroup Condition="$(DebugFRDrawing)">
     <ProjectReference Include="..\..\..\FastReport.Drawing.Skia\src\FastReport.Drawing.Skia.csproj" />
   </ItemGroup>
