@@ -8,7 +8,7 @@
           DestinationFolder="$(BaseOutputPath)runtimes\any\lib\netcoreapp3.1"/>
 
       <!-- Copy *.targets for nuget pack -->
-    <Copy SourceFiles="$(SlnDir)\Nuget\FastReport.Compat.targets"
+    <Copy SourceFiles="$(SlnDir)\Nuget\$(PackageId).targets"
           DestinationFolder="$(BaseOutputPath)\build\netcoreapp3.1"/>
 
       <!-- Copy resources for nuget pack -->

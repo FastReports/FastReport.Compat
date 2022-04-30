@@ -13,7 +13,7 @@ namespace CakeScript
     partial class Program
     {
         [DependsOn(nameof(PrepareNuget))]
-        public void PackCompat()
+        public void PackCompatSkia()
         {
             string solutionFile = Path.Combine(solutionDirectory, solutionFilename);
             string usedPackagesVersionPath = Path.Combine(solutionDirectory, "UsedPackages.version");
@@ -39,8 +39,8 @@ namespace CakeScript
             TargetBuildCore("PrepareCompatPackage");
 
             // Get used packages version
-            string SystemDrawingCommonVersion = XmlPeek(usedPackagesVersionPath, "//SystemDrawingCommonVersion/text()");
-            Information($"System.Drawing.Common version: {SystemDrawingCommonVersion}");
+            string FastReportDrawingVersion = XmlPeek(usedPackagesVersionPath, "//FastReportDrawingVersion/text()");
+            Information($"FastReport.Drawing.Skia version: {FastReportDrawingVersion}");
             string CodeAnalysisCSharpVersion = XmlPeek(usedPackagesVersionPath, "//CodeAnalysisCSharpVersion/text()");
             Information($"Microsoft.CodeAnalysis.CSharp version: {CodeAnalysisCSharpVersion}");
             string CodeAnalysisVisualBasicVersion = XmlPeek(usedPackagesVersionPath, "//CodeAnalysisVisualBasicVersion/text()");
@@ -48,11 +48,7 @@ namespace CakeScript
 
 
             var dependencies = new List<NuSpecDependency>();
-            AddNuSpecDep(null, null, ".NETFramework4.0");
-            // System.Drawing.Common reference doesn't included in net5.0-windows target
-            AddNuSpecDep("System.Drawing.Common", SystemDrawingCommonVersion, tfmStandard20);
-            AddNuSpecDep("System.Drawing.Common", SystemDrawingCommonVersion, tfmStandard21);
-            AddNuSpecDep("System.Drawing.Common", SystemDrawingCommonVersion, tfmCore31);
+            AddNuSpecDepCore("FastReport.Drawing.Skia", FastReportDrawingVersion);
             AddNuSpecDepCore("Microsoft.CodeAnalysis.CSharp", CodeAnalysisCSharpVersion);
             AddNuSpecDepCore("Microsoft.CodeAnalysis.VisualBasic", CodeAnalysisVisualBasicVersion);
             AddNuSpecDep("System.Windows.Extensions", "4.6.0", tfmCore31);
@@ -63,7 +59,7 @@ namespace CakeScript
 
             var nuGetPackSettings = new NuGetPackSettings
             {
-                Id = "FastReport.Compat",
+                Id = "FastReport.Compat.Skia",
                 Version = version,
                 Authors = new[] { "Fast Reports Inc." },
                 Owners = new[] { "Fast Reports Inc." },
@@ -96,7 +92,6 @@ namespace CakeScript
                 AddNuSpecDep(id, version, tfmStandard20);
                 AddNuSpecDep(id, version, tfmStandard21);
                 AddNuSpecDep(id, version, tfmCore31);
-                AddNuSpecDep(id, version, tfmNet5win7);
             }
 
             void AddNuSpecDep(string id, string version, string tfm)

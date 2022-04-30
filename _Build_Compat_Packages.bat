@@ -10,4 +10,5 @@ ECHO TRY TO BUILD FR.Compat
 
 pushd .\build\Cake
    dotnet run --target=PackCompat --solution-filename=FastReport.Compat.sln --config=Release --vers=2021.3.1
+   dotnet run --target=PackCompatSkia --solution-filename=FastReport.Compat.Skia.sln --config=Release --vers=2022.3.0
 popd

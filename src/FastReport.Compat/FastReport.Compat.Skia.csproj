@@ -2,7 +2,14 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard2.1;netcoreapp3.1</TargetFrameworks>
+
+    <AssemblyName>FastReport.Compat.Skia</AssemblyName>
+    <PackageId>$(AssemblyName)</PackageId>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants>$(DefineConstants);SKIA;</DefineConstants>
+
+    <!--If 'true' then excludes FastReport.Drawing.Skia package and adds reference to local source code-->
+    <DebugFRDrawing>false</DebugFRDrawing>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)'!='netcoreapp3.1'">
@@ -16,13 +23,17 @@
   <Import Project="$(SlnDir)UsedPackages.version" />
 
   <ItemGroup>
-    <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonVersion)"/>
+    <PackageReference Include="FastReport.Drawing.Skia" Version="$(FastReportDrawingVersion)" Condition="!$(DebugFRDrawing)" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(CodeAnalysisCSharpVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="$(CodeAnalysisVisualBasicVersion)" />
   </ItemGroup>
     
   <ItemGroup Condition="'$(TargetFramework)'=='netcoreapp3.1'">
     <PackageReference Include="System.Windows.Extensions" Version="4.6.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(DebugFRDrawing)">
+    <ProjectReference Include="..\..\..\FastReport.Drawing.Skia\src\FastReport.Drawing.Skia.csproj" />
   </ItemGroup>
   
 </Project>
