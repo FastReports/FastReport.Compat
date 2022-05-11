@@ -388,17 +388,17 @@ namespace FastReport
             }
         }
 
-        public static IGraphics FromImage(Image image)
+        public static GdiGraphics FromImage(Image image)
         {
             return new GdiGraphics(image);
         }
 
-        public static IGraphics FromGraphics(Graphics graphics)
+        public static GdiGraphics FromGraphics(Graphics graphics)
         {
             return new GdiGraphics(graphics, false);
         }
 
-        public static IGraphics FromHdc(IntPtr hdc)
+        public static GdiGraphics FromHdc(IntPtr hdc)
         {
             return FromGraphics(Graphics.FromHdc(hdc));
         }
