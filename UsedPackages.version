@@ -3,7 +3,7 @@
 <!-- This group sets version used packages in FastReport.Compat and package -->
     <PropertyGroup>
 
-        <SystemDrawingCommonVersion>[4.6.0,)</SystemDrawingCommonVersion>
+        <SystemDrawingCommonVersion>[4.7.0,)</SystemDrawingCommonVersion>
 
         <CodeAnalysisCSharpVersion>[3.3.1,)</CodeAnalysisCSharpVersion>
 

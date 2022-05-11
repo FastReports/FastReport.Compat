@@ -8,7 +8,7 @@ namespace FastReport.Code.CodeDom.Compiler
 {
     public class CompilerResults
     {
-        public List<CompilerError> Errors { get; internal set; } = new List<CompilerError>();
+        public List<CompilerError> Errors { get; } = new List<CompilerError>();
         public Assembly CompiledAssembly { get; internal set; } = null;
     }
 }

@@ -12,7 +12,7 @@ namespace FastReport
     public class GdiGraphics : IGraphics
     {
         private Graphics graphics = null;
-        private bool haveToDispose = false;
+        private readonly bool haveToDispose = false;
 
         #region Properties
         public Graphics Graphics
@@ -44,6 +44,7 @@ namespace FastReport
             this.graphics = graphics;
             this.haveToDispose = haveToDispose;
         }
+
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
@@ -354,6 +355,11 @@ namespace FastReport
             this.graphics.SetClip(rect);
         }
 
+        public void SetClip(Region region, CombineMode combineMode)
+        {
+            this.graphics.SetClip(region, combineMode);
+        }
+
         public void SetClip(RectangleF rect, CombineMode combineMode)
         {
             this.graphics.SetClip(rect, combineMode);
@@ -367,7 +373,7 @@ namespace FastReport
 
         public class ImageGraphicsRendererState : IGraphicsState
         {
-            private GraphicsState graphicsState;
+            private readonly GraphicsState graphicsState;
 
             public GraphicsState GraphicsState
             {
@@ -381,6 +387,22 @@ namespace FastReport
                 this.graphicsState = state;
             }
         }
+
+        public static GdiGraphics FromImage(Image image)
+        {
+            return new GdiGraphics(image);
+        }
+
+        public static GdiGraphics FromGraphics(Graphics graphics)
+        {
+            return new GdiGraphics(graphics, false);
+        }
+
+        public static GdiGraphics FromHdc(IntPtr hdc)
+        {
+            return FromGraphics(Graphics.FromHdc(hdc));
+        }
+
     }
 
 }

@@ -559,7 +559,32 @@ namespace System.Windows.Forms
 
     public class KeyEventArgs : EventArgs
     {
-        public Keys KeyCode;
+        public Keys KeyCode
+        {
+            get
+            {
+                Keys keys = KeyData & Keys.KeyCode;
+                if (!Enum.IsDefined(typeof(Keys), (int)keys))
+                {
+                    return Keys.None;
+                }
+
+                return keys;
+            }
+        }
+
+        public readonly Keys KeyData;
+
+        public bool Control => (KeyData & Keys.Control) == Keys.Control;
+
+        public KeyEventArgs(Keys keyData)
+        {
+            KeyData = keyData;
+        }
+
+        public KeyEventArgs() : this(default)
+        {
+        }
     }
 
     public class KeyPressEventArgs : EventArgs
@@ -568,11 +593,18 @@ namespace System.Windows.Forms
 
     public class MouseEventArgs : EventArgs
     {
-        public int X, Y;
-        public MouseButtons Button;
-        public int Clicks;
-        public int Delta;
-        public MouseEventArgs(MouseButtons b, int a, int x, int y, int i) { }
+        public readonly int X, Y;
+        public readonly MouseButtons Button;
+        public readonly int Clicks;
+        public readonly int Delta;
+        public Point Location => new Point(X, Y);
+        public MouseEventArgs(MouseButtons button, int clicks, int x, int y, int delta) {
+            Button = button;
+            X = x;
+            Y = y;
+            Clicks = clicks;
+            Delta = delta;
+        }
     }
 
     public class PaintEventArgs : EventArgs
@@ -698,7 +730,7 @@ namespace System.Windows.Forms
         public RightToLeft RightToLeft;
         public int TabIndex;
         public bool TabStop;
-        public string Text = "";                                                            //
+        public virtual string Text { get; set; } = "";                                                            //
         public DockStyle Dock;
         public AnchorStyles Anchor;
         public bool Visible = true;                                                         //
@@ -756,6 +788,8 @@ namespace System.Windows.Forms
         public void Invalidate() { }
         public void SetStyle(ControlStyles style, bool fl) { }
         public Form FindForm() { return null; }
+        public void PerformLayout() { }
+        protected void UpdateStyles() { }
 
         protected virtual System.Drawing.Size DefaultSize { get; set; }
         public virtual Image BackgroundImage { get; set; }
@@ -773,9 +807,11 @@ namespace System.Windows.Forms
         protected virtual void OnLostFocus(EventArgs e) { }
         protected virtual void OnCursorChanged(EventArgs e) { }
         protected virtual void OnMouseDown(MouseEventArgs e) { }
+        protected virtual void OnMouseLeave(EventArgs e) { }
         protected virtual void OnMouseUp(MouseEventArgs e) { }
         protected virtual void OnMouseMove(MouseEventArgs e) { }
         protected virtual void OnDoubleClick(EventArgs e) { }
+        protected virtual void OnMouseDoubleClick(MouseEventArgs e) { }
         protected virtual void OnInvalidated(InvalidateEventArgs e) { }
         protected virtual void OnBackColorChanged(EventArgs eventArgs) { }
     }
@@ -1431,6 +1467,10 @@ namespace System.Windows.Forms
         public static void DrawFocusRectangle(Graphics g, Rectangle r) { }
     }
 
+    public class ScrollableControl : Control
+    {
+
+    }
 }
 
 #pragma warning restore FR0000 // Field must be texted in lowerCamelCase.
