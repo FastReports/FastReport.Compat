@@ -86,7 +86,8 @@ namespace CakeScript
             };
 
             // Pack
-            NuGetPack(Path.Combine(solutionDirectory, "Nuget", nuGetPackSettings.Id + ".nuspec"), nuGetPackSettings);
+            var template = Path.Combine(solutionDirectory, "Nuget", nuGetPackSettings.Id + ".nuspec");
+            NuGetPack(template, nuGetPackSettings);
 
             // Local functions:
 
@@ -106,7 +107,7 @@ namespace CakeScript
 
             void TargetBuildCore(string target)
             {
-                DotNetCoreMSBuild(solutionFile, new DotNetCoreMSBuildSettings()
+                DotNetMSBuild(solutionFile, new DotNetCoreMSBuildSettings()
                   .SetConfiguration(config)
                   .WithTarget(target)
                   .WithProperty("SolutionDir", solutionDirectory)

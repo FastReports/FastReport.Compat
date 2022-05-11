@@ -100,7 +100,7 @@ namespace CakeScript
 
             void TargetBuildCore(string target)
             {
-                DotNetCoreMSBuild(solutionFile, new DotNetCoreMSBuildSettings()
+                DotNetMSBuild(solutionFile, new DotNetCoreMSBuildSettings()
                   .SetConfiguration(config)
                   .WithTarget(target)
                   .WithProperty("SolutionDir", solutionDirectory)
