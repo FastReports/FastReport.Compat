@@ -21,15 +21,14 @@
   </PropertyGroup>
 
   <Import Project="$(SlnDir)UsedPackages.version" />
-
   <ItemGroup>
-    <PackageReference Include="FastReport.Drawing.Skia" Version="$(FastReportDrawingVersion)" Condition="!$(DebugFRDrawing)" />
+    <PackageReference Include="FastReport.SkiaDrawing" Version="$(FastReportSkiaDrawingVersion)" Condition="!$(DebugFRDrawing)" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(CodeAnalysisCSharpVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="$(CodeAnalysisVisualBasicVersion)" />
   </ItemGroup>
     
   <ItemGroup Condition="$(DebugFRDrawing)">
-    <ProjectReference Include="..\..\..\FastReport.Drawing.Skia\src\FastReport.Drawing.Skia.csproj" />
+    <ProjectReference Include="..\..\..\FastReport.Drawing\src\FastReport.SkiaDrawing.csproj" />
   </ItemGroup>
   
 </Project>

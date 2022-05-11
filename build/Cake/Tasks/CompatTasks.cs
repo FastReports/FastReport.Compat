@@ -52,10 +52,10 @@ namespace CakeScript
             // System.Drawing.Common reference doesn't included in net5.0-windows target
             AddNuSpecDep("System.Drawing.Common", SystemDrawingCommonVersion, tfmStandard20);
             AddNuSpecDep("System.Drawing.Common", SystemDrawingCommonVersion, tfmStandard21);
-            AddNuSpecDep("System.Drawing.Common", SystemDrawingCommonVersion, tfmCore31);
+            AddNuSpecDep("System.Drawing.Common", SystemDrawingCommonVersion, tfmCore30);
             AddNuSpecDepCore("Microsoft.CodeAnalysis.CSharp", CodeAnalysisCSharpVersion);
             AddNuSpecDepCore("Microsoft.CodeAnalysis.VisualBasic", CodeAnalysisVisualBasicVersion);
-            AddNuSpecDep("System.Windows.Extensions", "4.6.0", tfmCore31);
+            AddNuSpecDep("System.Windows.Extensions", "4.6.0", tfmCore30);
 
             var files = new[] {
                new NuSpecContent{Source = Path.Combine(nugetDir, "**", "*.*"), Target = ""},
@@ -70,7 +70,7 @@ namespace CakeScript
                 Description = "Common compatible types for FastReport .Net, Core and Mono",
                 Repository = new NuGetRepository { Type = "GIT", Url = "https://github.com/FastReports/FastReport.Compat" },
                 ProjectUrl = new Uri("https://www.fast-report.com/en/product/fast-report-net"),
-                Icon = "frlogo192.png",
+                Icon = FRLOGO192PNG,
                 IconUrl = new Uri("https://raw.githubusercontent.com/FastReports/FastReport.Compat/master/frlogo-big.png"),
                 ReleaseNotes = new[] { "See the latest changes on https://github.com/FastReports/FastReport.Compat" },
                 License = new NuSpecLicense { Type = "file", Value = "LICENSE.md" },
@@ -91,12 +91,12 @@ namespace CakeScript
 
             // Local functions:
 
-            // For Net Standard 2.0, Standard 2.1, Core 3.1 and Net 5.0
+            // For Net Standard 2.0, Standard 2.1, Core 3.0 and Net 5.0
             void AddNuSpecDepCore(string id, string version)
             {
                 AddNuSpecDep(id, version, tfmStandard20);
                 AddNuSpecDep(id, version, tfmStandard21);
-                AddNuSpecDep(id, version, tfmCore31);
+                AddNuSpecDep(id, version, tfmCore30);
                 AddNuSpecDep(id, version, tfmNet5win7);
             }
 
