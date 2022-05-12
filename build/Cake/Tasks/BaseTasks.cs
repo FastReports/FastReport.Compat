@@ -19,22 +19,6 @@ namespace CakeScript
         readonly string solutionFilename = Argument("solution-filename", "FastReport.Compat.sln");
         readonly string version = Argument("vers", "1.0.0.0");
         string outdir = Argument("out-dir", "");
-        readonly string pluginsRelativePath = Path.Combine("Extras", "Core", "FastReport.Data");
-
-        readonly string[] Plugins_Core = new[]
-        {
-          "Postgres",
-          "MsSql",
-          "MySql",
-          "Json",
-          "Couchbase",
-          "MongoDB",
-          "OracleODPCore",
-          "RavenDB",
-          "SQLite",
-          "ClickHouse",
-          "Firebird",
-        };
 
         public Program(string[] args)
         {
