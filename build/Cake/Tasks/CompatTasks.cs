@@ -70,7 +70,7 @@ namespace CakeScript
                 Description = "Common compatible types for FastReport .Net, Core and Mono",
                 Repository = new NuGetRepository { Type = "GIT", Url = "https://github.com/FastReports/FastReport.Compat" },
                 ProjectUrl = new Uri("https://www.fast-report.com/en/product/fast-report-net"),
-                Icon = "frlogo192.png",
+                Icon = FRLOGO192PNG,
                 IconUrl = new Uri("https://raw.githubusercontent.com/FastReports/FastReport.Compat/master/frlogo-big.png"),
                 ReleaseNotes = new[] { "See the latest changes on https://github.com/FastReports/FastReport.Compat" },
                 License = new NuSpecLicense { Type = "file", Value = "LICENSE.md" },
@@ -86,7 +86,8 @@ namespace CakeScript
             };
 
             // Pack
-            NuGetPack(Path.Combine(solutionDirectory, "Nuget", nuGetPackSettings.Id + ".nuspec"), nuGetPackSettings);
+            var template = Path.Combine(solutionDirectory, "Nuget", nuGetPackSettings.Id + ".nuspec");
+            NuGetPack(template, nuGetPackSettings);
 
             // Local functions:
 
@@ -106,7 +107,7 @@ namespace CakeScript
 
             void TargetBuildCore(string target)
             {
-                DotNetCoreMSBuild(solutionFile, new DotNetCoreMSBuildSettings()
+                DotNetMSBuild(solutionFile, new DotNetCoreMSBuildSettings()
                   .SetConfiguration(config)
                   .WithTarget(target)
                   .WithProperty("SolutionDir", solutionDirectory)
