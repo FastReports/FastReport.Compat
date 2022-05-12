@@ -10,13 +10,13 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(VisualStudioVersion)' >= '16'">
-    <TargetFrameworks>$(TargetFrameworks);netcoreapp3.1;net5.0-windows7.0;</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);netcoreapp3.0;net5.0-windows7.0;</TargetFrameworks>
   </PropertyGroup>
 
   <!--Explicit import Directory.Build.props (for old-style csproj)-->
   <Import Project="..\..\Directory.Build.props" Condition="'$(UsingMicrosoftNETSdk)' != 'true'"/>
 
-  <PropertyGroup Condition="'$(TargetFramework)'!='netcoreapp3.1'">
+  <PropertyGroup Condition="'$(TargetFramework)'!='netcoreapp3.0'">
     <OutputPath>$(BaseOutputPath)\lib</OutputPath>
   </PropertyGroup>
 
@@ -24,7 +24,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)'=='netcoreapp3.1'">
+  <PropertyGroup Condition="'$(TargetFramework)'=='netcoreapp3.0'">
     <OutDir>$(BaseOutputPath)\build\$(TargetFramework)\lib\Win</OutDir>
   </PropertyGroup>
 
@@ -34,7 +34,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="$(CodeAnalysisVisualBasicVersion)" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)'=='netcoreapp3.1'">
+  <ItemGroup Condition="'$(TargetFramework)'=='netcoreapp3.0'">
     <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonVersion)" />
     <PackageReference Include="System.Windows.Extensions" Version="4.6.0"/>
   </ItemGroup>
