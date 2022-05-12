@@ -9,5 +9,5 @@ rem that's all
 ECHO TRY TO BUILD FR.Compat
 
 pushd .\build\Cake
-   dotnet run --target=PackCompat --solution-filename=FastReport.Compat.sln --config=Release --vers=2021.4.0
+   dotnet run --target=PackCompat --solution-filename=FastReport.Compat.sln --config=Release --vers=2022.1.0
 popd
