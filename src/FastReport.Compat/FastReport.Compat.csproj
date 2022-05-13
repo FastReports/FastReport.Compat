@@ -19,9 +19,5 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(CodeAnalysisCSharpVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="$(CodeAnalysisVisualBasicVersion)" />
   </ItemGroup>
-    
-  <ItemGroup Condition="'$(TargetFramework)'=='netcoreapp3.0'">
-    <PackageReference Include="System.Windows.Extensions" Version="4.6.0" />
-  </ItemGroup>
-  
+      
 </Project>

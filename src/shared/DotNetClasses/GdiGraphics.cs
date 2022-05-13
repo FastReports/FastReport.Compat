@@ -11,8 +11,8 @@ namespace FastReport
     /// </summary>
     public class GdiGraphics : IGraphics
     {
-        private Graphics graphics = null;
-        private readonly bool haveToDispose = false;
+        private Graphics graphics;
+        private readonly bool haveToDispose;
 
         #region Properties
         public Graphics Graphics
