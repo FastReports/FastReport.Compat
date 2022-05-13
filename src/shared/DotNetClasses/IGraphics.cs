@@ -97,7 +97,6 @@ namespace FastReport
         bool IsVisible(RectangleF rect);
         void ResetClip();
         void SetClip(RectangleF rect);
-        void SetClip(Region region, CombineMode combineMode);
         void SetClip(RectangleF rect, CombineMode combineMode);
         void SetClip(GraphicsPath path, CombineMode combineMode);
         #endregion

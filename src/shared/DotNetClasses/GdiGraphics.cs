@@ -355,11 +355,6 @@ namespace FastReport
             this.graphics.SetClip(rect);
         }
 
-        public void SetClip(Region region, CombineMode combineMode)
-        {
-            this.graphics.SetClip(region, combineMode);
-        }
-
         public void SetClip(RectangleF rect, CombineMode combineMode)
         {
             this.graphics.SetClip(rect, combineMode);

@@ -15,8 +15,11 @@ namespace CakeScript
         [DependsOn(nameof(PrepareNuget))]
         public void PackCompat()
         {
+            const string packageId = "FastReport.Compat";
             string solutionFile = Path.Combine(solutionDirectory, solutionFilename);
             string usedPackagesVersionPath = Path.Combine(solutionDirectory, "UsedPackages.version");
+            string resourcesDir = Path.Combine(solutionDirectory, "Nuget");
+            string packCopyDir = Path.Combine(resourcesDir, packageId);
 
             string nugetDir = Path.Combine(solutionDirectory, "bin", IsRelease ? "nuget" : config);
 
@@ -59,11 +62,12 @@ namespace CakeScript
 
             var files = new[] {
                new NuSpecContent{Source = Path.Combine(nugetDir, "**", "*.*"), Target = ""},
+               new NuSpecContent{Source = Path.Combine(packCopyDir, "**", "*.*"), Target = ""},
             };
 
             var nuGetPackSettings = new NuGetPackSettings
             {
-                Id = "FastReport.Compat",
+                Id = packageId,
                 Version = version,
                 Authors = new[] { "Fast Reports Inc." },
                 Owners = new[] { "Fast Reports Inc." },
@@ -86,7 +90,7 @@ namespace CakeScript
             };
 
             // Pack
-            var template = Path.Combine(solutionDirectory, "Nuget", nuGetPackSettings.Id + ".nuspec");
+            var template = Path.Combine(resourcesDir, nuGetPackSettings.Id + ".nuspec");
             NuGetPack(template, nuGetPackSettings);
 
             // Local functions:
