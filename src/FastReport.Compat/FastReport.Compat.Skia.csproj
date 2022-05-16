@@ -12,12 +12,8 @@
     <DebugFRDrawing>false</DebugFRDrawing>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)'!='netcoreapp3.0'">
+  <PropertyGroup>
     <OutputPath>$(BaseOutputPath)\lib</OutputPath>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)'=='netcoreapp3.0'">
-    <OutDir>$(BaseOutputPath)\build\$(TargetFramework)\lib\Any</OutDir>
   </PropertyGroup>
 
   <Import Project="$(SlnDir)UsedPackages.version" />

@@ -85,18 +85,16 @@ partial class Program
         };
 
         // Pack
-        var template = Path.Combine(resourcesDir, "template.nuspec");
-        NuGetPack(template, nuGetPackSettings);
+        NuGetPack(nuGetPackSettings);
 
         // Local functions:
 
-        // For Net Standard 2.0, Standard 2.1, Core 3.0 and Net 5.0-windows
+        // For Net Standard 2.0, Standard 2.1, Core 3.0
         void AddNuSpecDepCore(string id, string version)
         {
             AddNuSpecDep(id, version, tfmStandard20);
             AddNuSpecDep(id, version, tfmStandard21);
             AddNuSpecDep(id, version, tfmCore30);
-            AddNuSpecDep(id, version, tfmNet5win7);
         }
 
         void AddNuSpecDep(string id, string version, string tfm)

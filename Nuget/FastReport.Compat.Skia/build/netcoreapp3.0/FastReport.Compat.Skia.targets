@@ -14,23 +14,9 @@
 
     <Message Importance="high" Condition="$(_frDebug) == 'true'" Text="_UseWindowsDesktopSDK: $(_UseWindowsDesktopSDK)"/>
 
-    <ItemGroup Condition="!$(_UseWindowsDesktopSDK)">
-      <Reference Include="$(MSBuildThisFileDirectory)lib\Any\FastReport.Compat.Skia.dll" />
-    </ItemGroup>
-    <!-- We don't include lib\Win\FastReport.Compat.Skia.dll for .NET 5 or greater, 
-    because for .NET 5 Windows we use library in net5.0-windows7.0 folder -->
-    <ItemGroup Condition="$(_UseWindowsDesktopSDK) And $(TargetFrameworkVersion[1]) == '3'">
-      <Reference Include="$(MSBuildThisFileDirectory)lib\Win\FastReport.Compat.Skia.dll" />
-    </ItemGroup>
+    <Warning Condition="$(_UseWindowsDesktopSDK)" 
+        Text="We have detected that you are using WindowsForms API. FastReport.Compat.Skia doesn't support native WindowsForms API because it refers to System.Drawing (FastReport.SkiaGraphics replaces System.Drawing API)" />
 
-    <Message Importance="high" Condition="$(_frDebug) == 'true'" Text="References: '@(Reference)'"/>
-  </Target>
-
-  <Target Name="_FR_Compat_Skia_AfterResolveFrameworkReferences" Condition="$(_frDebug) == 'true'" AfterTargets="ResolveFrameworkReferences" >
-    <Message Importance="high" Text="FastReport.Compat.Skia after ResolveFrameworkReferences"/>
-    <Message Importance="high" Text="FrameworkReference: '@(FrameworkReference)'"/>
-    <Message Importance="high" Text="ResolvedFrameworkReference: '@(ResolvedFrameworkReference)'"/>
-    <Message Importance="high" Text="References: '@(Reference)'"/>
   </Target>
 
 </Project>
