@@ -6,7 +6,7 @@ using System.Text;
 
 namespace System.Drawing
 {
-    #if NETSTANDARD2_0
+    #if NETSTANDARD2_0 && !SKIA
     public enum KnownColor
     {
         ActiveBorder = 1,
@@ -573,5 +573,4 @@ namespace System.Drawing
     }
 }
 #endif
-
 

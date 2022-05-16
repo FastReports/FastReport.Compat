@@ -1,0 +1,22 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- Include correct version of FastReport.Compat.Skia for .NET Core 3.0 or greater with/without WindowsForms API -->
+  <Target Name="_FR_Compat_Skia_AddReference" AfterTargets="AddTransitiveFrameworkReferences" >
+    <Message Importance="high" Condition="$(_frDebug) == 'true'" Text="FastReport.Compat.Skia after AddTransitiveFrameworkReferences"/>
+    <Message Importance="high" Condition="$(_frDebug) == 'true'" Text="FrameworkReference: '@(FrameworkReference)'"/>
+    <Message Importance="high" Condition="$(_frDebug) == 'true'" Text="ResolvedFrameworkReference: '@(ResolvedFrameworkReference)'"/>
+    <Message Importance="high" Condition="$(_frDebug) == 'true'" Text="TargetFrameworkVersion: '$(TargetFrameworkVersion)'"/>
+
+    <PropertyGroup>
+      <_UserFrameworkReferences>@(FrameworkReference)</_UserFrameworkReferences>
+      <_UseWindowsDesktopSDK>$(_UserFrameworkReferences.Contains('Microsoft.WindowsDesktop.App.WindowsForms'))</_UseWindowsDesktopSDK>
+    </PropertyGroup>
+
+    <Message Importance="high" Condition="$(_frDebug) == 'true'" Text="_UseWindowsDesktopSDK: $(_UseWindowsDesktopSDK)"/>
+
+    <Warning Condition="$(_UseWindowsDesktopSDK)" 
+        Text="We have detected that you are using WindowsForms API. FastReport.Compat.Skia doesn't support native WindowsForms API because it refers to System.Drawing (FastReport.SkiaGraphics replaces System.Drawing API)" />
+
+  </Target>
+
+</Project>

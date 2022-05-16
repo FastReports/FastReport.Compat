@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard2.1;netcoreapp3.0</TargetFrameworks>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)'!='netcoreapp3.0'">
@@ -9,20 +10,14 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)'=='netcoreapp3.0'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    
     <OutDir>$(BaseOutputPath)\build\$(TargetFramework)\lib\Any</OutDir>
   </PropertyGroup>
 
   <Import Project="$(SlnDir)UsedPackages.version" />
   <ItemGroup>
-    <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonVersion)" />
+    <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonVersion)"/>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(CodeAnalysisCSharpVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="$(CodeAnalysisVisualBasicVersion)" />
   </ItemGroup>
-    
-  <ItemGroup Condition="'$(TargetFramework)'=='netcoreapp3.0'">
-    <PackageReference Include="System.Windows.Extensions" Version="4.6.0" />
-  </ItemGroup>
-  
+      
 </Project>

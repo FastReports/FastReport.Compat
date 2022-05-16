@@ -13,9 +13,9 @@ namespace CakeScript;
 partial class Program
 {
     [DependsOn(nameof(PrepareNuget))]
-    public void PackCompat()
+    public void PackCompatSkia()
     {
-        const string packageId = "FastReport.Compat";
+        const string packageId = "FastReport.Compat.Skia";
         string solutionFile = Path.Combine(solutionDirectory, solutionFilename);
         string usedPackagesVersionPath = Path.Combine(solutionDirectory, "UsedPackages.version");
         string resourcesDir = Path.Combine(solutionDirectory, "Nuget");
@@ -40,17 +40,10 @@ partial class Program
         TargetBuildCore("Build");
 
         TargetBuildCore("PrepareCompatPackage");
-        
-        string emptyFilePath = Path.Combine(nugetDir, "lib", "netcoreapp3.0", "_._");
-        Directory.GetParent(emptyFilePath).Create();
-        File.Create(emptyFilePath).Close();
-
-        if (!File.Exists(emptyFilePath))
-            throw new Exception($"Empty file wasn't created. '{emptyFilePath}'");
 
         // Get used packages version
-        string SystemDrawingCommonVersion = XmlPeek(usedPackagesVersionPath, "//SystemDrawingCommonVersion/text()");
-        Information($"System.Drawing.Common version: {SystemDrawingCommonVersion}");
+        string FastReportSkiaDrawingVersion = XmlPeek(usedPackagesVersionPath, "//FastReportSkiaDrawingVersion/text()");
+        Information($"FastReport.SkiaDrawing version: {FastReportSkiaDrawingVersion}");
         string CodeAnalysisCSharpVersion = XmlPeek(usedPackagesVersionPath, "//CodeAnalysisCSharpVersion/text()");
         Information($"Microsoft.CodeAnalysis.CSharp version: {CodeAnalysisCSharpVersion}");
         string CodeAnalysisVisualBasicVersion = XmlPeek(usedPackagesVersionPath, "//CodeAnalysisVisualBasicVersion/text()");
@@ -58,11 +51,7 @@ partial class Program
 
 
         var dependencies = new List<NuSpecDependency>();
-        AddNuSpecDep(null, null, tfmNet40);
-        // System.Drawing.Common reference doesn't included in net5.0-windows target
-        AddNuSpecDep("System.Drawing.Common", SystemDrawingCommonVersion, tfmStandard20);
-        AddNuSpecDep("System.Drawing.Common", SystemDrawingCommonVersion, tfmStandard21);
-        AddNuSpecDep("System.Drawing.Common", SystemDrawingCommonVersion, tfmCore30);
+        AddNuSpecDepCore("FastReport.SkiaDrawing", FastReportSkiaDrawingVersion);
         AddNuSpecDepCore("Microsoft.CodeAnalysis.CSharp", CodeAnalysisCSharpVersion);
         AddNuSpecDepCore("Microsoft.CodeAnalysis.VisualBasic", CodeAnalysisVisualBasicVersion);
 
@@ -96,18 +85,16 @@ partial class Program
         };
 
         // Pack
-        var template = Path.Combine(resourcesDir, "template.nuspec");
-        NuGetPack(template, nuGetPackSettings);
+        NuGetPack(nuGetPackSettings);
 
         // Local functions:
 
-        // For Net Standard 2.0, Standard 2.1, Core 3.0 and Net 5.0-windows
+        // For Net Standard 2.0, Standard 2.1, Core 3.0
         void AddNuSpecDepCore(string id, string version)
         {
             AddNuSpecDep(id, version, tfmStandard20);
             AddNuSpecDep(id, version, tfmStandard21);
             AddNuSpecDep(id, version, tfmCore30);
-            AddNuSpecDep(id, version, tfmNet5win7);
         }
 
         void AddNuSpecDep(string id, string version, string tfm)

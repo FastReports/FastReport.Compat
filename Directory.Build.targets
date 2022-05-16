@@ -7,8 +7,8 @@
     <Copy SourceFiles="$(SlnDir)\frlogo192.png;$(SlnDir)\LICENSE.md"
           DestinationFolder="$(BaseOutputPath)"/>
 
-    <Copy SourceFiles="$(SlnDir)\Nuget\_._"
-          DestinationFolder="$(BaseOutputPath)\lib\netcoreapp3.0"/>
+    <!-- TODO: Remove for Skia -->
+    <!-- <Copy SourceFiles="$(SlnDir)\Nuget\_._"
+          DestinationFolder="$(BaseOutputPath)\lib\netcoreapp3.0"/> -->
   </Target>
-
 </Project>

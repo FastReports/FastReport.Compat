@@ -6,8 +6,8 @@
     <BaseOutputPath>$(SlnDir)bin</BaseOutputPath>
     <Authors>Fast Reports Inc.</Authors>
     <Product>FastReport</Product>
-    <Copyright>Fast Reports Inc.</Copyright>
     <PackageId>FastReport.Compat</PackageId>
+    <Copyright>Fast Reports Inc.</Copyright>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
     <PackageProjectUrl>https://www.fast-report.com/en/product/fast-report-net</PackageProjectUrl>
     <PackageTags>reporting, reports, pdf, html, mvc, core</PackageTags>
@@ -26,9 +26,8 @@
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
     <BuildProjectReferences>false</BuildProjectReferences>
-	  <GenerateDependencyFile>false</GenerateDependencyFile>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
   </PropertyGroup>
-
 
   <ItemGroup>
     <Compile Include="$(SourceCode)\**\*.cs"/>

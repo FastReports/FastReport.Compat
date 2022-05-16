@@ -93,7 +93,9 @@ namespace FastReport.Code.CodeDom.Compiler
                 "System.ComponentModel.Primitives",
                 "System.Core",
                 "System.Data.Common",
+#if !SKIA
                 "System.Drawing.Common",
+#endif
                 "System.Globalization",
                 "System.IO",
                 "System.Linq",

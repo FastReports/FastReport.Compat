@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;netcoreapp3.0</TargetFrameworks>
+
+    <AssemblyName>FastReport.Compat.Skia</AssemblyName>
+    <PackageId>$(AssemblyName)</PackageId>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants>$(DefineConstants);SKIA;</DefineConstants>
+
+    <!--If 'true' then excludes FastReport.SkiaDrawing package and adds reference to local source code-->
+    <DebugFRDrawing>false</DebugFRDrawing>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <OutputPath>$(BaseOutputPath)\lib</OutputPath>
+  </PropertyGroup>
+
+  <Import Project="$(SlnDir)UsedPackages.version" />
+  <ItemGroup>
+    <PackageReference Include="FastReport.SkiaDrawing" Version="$(FastReportSkiaDrawingVersion)" Condition="!$(DebugFRDrawing)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(CodeAnalysisCSharpVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="$(CodeAnalysisVisualBasicVersion)" />
+  </ItemGroup>
+    
+  <ItemGroup Condition="$(DebugFRDrawing)">
+    <ProjectReference Include="..\..\..\FastReport.Drawing\src\FastReport.SkiaDrawing.csproj" />
+  </ItemGroup>
+  
+</Project>
