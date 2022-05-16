@@ -1,0 +1,36 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- Include correct version of FastReport.Compat.Skia for .NET Core 3.0 or greater with/without WindowsForms API -->
+  <Target Name="_FR_Compat_Skia_AddReference" AfterTargets="AddTransitiveFrameworkReferences" >
+    <Message Importance="high" Condition="$(_frDebug) == 'true'" Text="FastReport.Compat.Skia after AddTransitiveFrameworkReferences"/>
+    <Message Importance="high" Condition="$(_frDebug) == 'true'" Text="FrameworkReference: '@(FrameworkReference)'"/>
+    <Message Importance="high" Condition="$(_frDebug) == 'true'" Text="ResolvedFrameworkReference: '@(ResolvedFrameworkReference)'"/>
+    <Message Importance="high" Condition="$(_frDebug) == 'true'" Text="TargetFrameworkVersion: '$(TargetFrameworkVersion)'"/>
+
+    <PropertyGroup>
+      <_UserFrameworkReferences>@(FrameworkReference)</_UserFrameworkReferences>
+      <_UseWindowsDesktopSDK>$(_UserFrameworkReferences.Contains('Microsoft.WindowsDesktop.App.WindowsForms'))</_UseWindowsDesktopSDK>
+    </PropertyGroup>
+
+    <Message Importance="high" Condition="$(_frDebug) == 'true'" Text="_UseWindowsDesktopSDK: $(_UseWindowsDesktopSDK)"/>
+
+    <ItemGroup Condition="!$(_UseWindowsDesktopSDK)">
+      <Reference Include="$(MSBuildThisFileDirectory)lib\Any\FastReport.Compat.Skia.dll" />
+    </ItemGroup>
+    <!-- We don't include lib\Win\FastReport.Compat.Skia.dll for .NET 5 or greater, 
+    because for .NET 5 Windows we use library in net5.0-windows7.0 folder -->
+    <ItemGroup Condition="$(_UseWindowsDesktopSDK) And $(TargetFrameworkVersion[1]) == '3'">
+      <Reference Include="$(MSBuildThisFileDirectory)lib\Win\FastReport.Compat.Skia.dll" />
+    </ItemGroup>
+
+    <Message Importance="high" Condition="$(_frDebug) == 'true'" Text="References: '@(Reference)'"/>
+  </Target>
+
+  <Target Name="_FR_Compat_Skia_AfterResolveFrameworkReferences" Condition="$(_frDebug) == 'true'" AfterTargets="ResolveFrameworkReferences" >
+    <Message Importance="high" Text="FastReport.Compat.Skia after ResolveFrameworkReferences"/>
+    <Message Importance="high" Text="FrameworkReference: '@(FrameworkReference)'"/>
+    <Message Importance="high" Text="ResolvedFrameworkReference: '@(ResolvedFrameworkReference)'"/>
+    <Message Importance="high" Text="References: '@(Reference)'"/>
+  </Target>
+
+</Project>

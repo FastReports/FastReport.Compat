@@ -1,12 +1,13 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;netcoreapp3.0</TargetFrameworks>
-
+    <TargetFrameworks>netcoreapp3.0;net5.0-windows7.0</TargetFrameworks>
+    <DefineConstants>$(DefineConstants);NETCOREWIN</DefineConstants>
+    <UseWindowsForms>true</UseWindowsForms>
     <AssemblyName>FastReport.Compat.Skia</AssemblyName>
     <PackageId>$(AssemblyName)</PackageId>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DefineConstants>$(DefineConstants);SKIA;</DefineConstants>
 
     <!--If 'true' then excludes FastReport.SkiaDrawing package and adds reference to local source code-->
     <DebugFRDrawing>false</DebugFRDrawing>
@@ -17,18 +18,19 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)'=='netcoreapp3.0'">
-    <OutDir>$(BaseOutputPath)\build\$(TargetFramework)\lib\Any</OutDir>
+    <OutDir>$(BaseOutputPath)\build\$(TargetFramework)\lib\Win</OutDir>
   </PropertyGroup>
 
-  <Import Project="$(SlnDir)UsedPackages.version" />
+  <Import Project="$(SlnDir)UsedPackages.version"/>
   <ItemGroup>
     <PackageReference Include="FastReport.SkiaDrawing" Version="$(FastReportSkiaDrawingVersion)" Condition="!$(DebugFRDrawing)" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(CodeAnalysisCSharpVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="$(CodeAnalysisVisualBasicVersion)" />
   </ItemGroup>
-    
-  <ItemGroup Condition="$(DebugFRDrawing)">
-    <ProjectReference Include="..\..\..\FastReport.Drawing\src\FastReport.SkiaDrawing.csproj" />
+
+  <ItemGroup>
+    <Compile Remove="$(SourceCode)\WindowsForms\**\*.cs"/>
+    <Compile Remove="$(SourceCode)\DotNetClasses\UITypeEditor.cs"/>
   </ItemGroup>
   
 </Project>
