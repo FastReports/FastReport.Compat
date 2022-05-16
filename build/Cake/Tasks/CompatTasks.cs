@@ -40,6 +40,13 @@ partial class Program
         TargetBuildCore("Build");
 
         TargetBuildCore("PrepareCompatPackage");
+        
+        string emptyFilePath = Path.Combine(nugetDir, "lib", "netcoreapp3.0", "_._");
+        Directory.GetParent(emptyFilePath).Create();
+        File.Create(emptyFilePath).Close();
+
+        if (!File.Exists(emptyFilePath))
+            throw new Exception($"Empty file wasn't created. '{emptyFilePath}'");
 
         // Get used packages version
         string SystemDrawingCommonVersion = XmlPeek(usedPackagesVersionPath, "//SystemDrawingCommonVersion/text()");
