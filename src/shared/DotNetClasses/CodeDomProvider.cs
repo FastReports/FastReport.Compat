@@ -7,6 +7,8 @@ using System.Collections.Specialized;
 using System.Reflection;
 using System.Linq;
 using System.Reflection.Metadata;
+using System.Diagnostics;
+using System.ComponentModel;
 #if NETCOREAPP
 using System.Runtime.Loader;
 #endif
@@ -21,6 +23,12 @@ namespace FastReport.Code.CodeDom.Compiler
         public abstract CompilerResults CompileAssemblyFromSource(CompilerParameters cp, string v);
 
         public event EventHandler<CompilationEventArgs> BeforeEmitCompilation;
+
+        /// <summary>
+        /// For developers only
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static event EventHandler<string> Log;
 
 #if NETCOREAPP
         /// <summary>
@@ -39,50 +47,7 @@ namespace FastReport.Code.CodeDom.Compiler
                 };
 #endif
 
-        protected void AddReferences(CompilerParameters cp, List<MetadataReference> references)
-        {
-            foreach (string reference in cp.ReferencedAssemblies)
-            {
-#if DEBUG
-                Console.WriteLine($"TRY ADD {reference}.");
-#endif
-#if NETCOREAPP
-                try
-                {
-#endif
-                    references.Add(GetReference(reference));
-#if NETCOREAPP
-                }
-                catch (FileNotFoundException e)
-                {
-                    if (SkippedAssemblies.Contains(reference))
-                    {
-#if DEBUG
-                        Console.WriteLine($"{reference} FileNotFound. SKIPPED");
-#endif
-                        continue;
-                    }
-                    else
-                        throw e;
-                }
-#endif
-
-#if DEBUG
-                Console.WriteLine($"{reference} ADDED");
-#endif
-            }
-#if DEBUG
-            Console.WriteLine("AFTER ADDING ReferencedAssemblies");
-#endif
-
-            AddExtraAssemblies(cp.ReferencedAssemblies, references);
-        }
-
-
-        protected void AddExtraAssemblies(StringCollection referencedAssemblies, List<MetadataReference> references)
-        {
-
-            string[] assemblies = new[] {
+        private static readonly string[] _additionalAssemblies = new[] {
                 "mscorlib",
                 "netstandard",
                 "System.Collections.Concurrent",
@@ -108,7 +73,52 @@ namespace FastReport.Code.CodeDom.Compiler
                 "System.Text.RegularExpressions"
             };
 
-            foreach(string assembly in assemblies)
+        [Conditional("DEBUG")]  // Comment for use log messages in Release configuration
+        protected static void DebugMessage(string message)
+        {
+            Debug.WriteLine(message);
+
+            Log?.Invoke(null, message);
+        }
+
+        protected void AddReferences(CompilerParameters cp, List<MetadataReference> references)
+        {
+            foreach (string reference in cp.ReferencedAssemblies)
+            {
+                DebugMessage($"TRY ADD {reference}.");
+#if NETCOREAPP
+                try
+                {
+#endif
+                    var metadata = GetReference(reference);
+                    references.Add(metadata);
+#if NETCOREAPP
+                }
+                catch (FileNotFoundException e)
+                {
+                    DebugMessage($"{reference} FileNotFound");
+                    if (SkippedAssemblies.Contains(reference))
+                    {
+                        DebugMessage($"{reference} FileNotFound. SKIPPED");
+                        continue;
+                    }
+                    else
+                        throw e;
+                }
+#endif
+
+                DebugMessage($"{reference} ADDED");
+            }
+            DebugMessage("AFTER ADDING ReferencedAssemblies");
+
+            AddExtraAssemblies(cp.ReferencedAssemblies, references);
+        }
+
+
+        protected void AddExtraAssemblies(StringCollection referencedAssemblies, List<MetadataReference> references)
+        {
+
+            foreach(string assembly in _additionalAssemblies)
             {
                 if (!referencedAssemblies.Contains(assembly))
                 {
@@ -123,9 +133,7 @@ namespace FastReport.Code.CodeDom.Compiler
                     // We skip this error, because some assemblies in 'assemblies' array may not be needed
                     catch (FileNotFoundException)
                     {
-#if DEBUG
-                        Console.WriteLine($"{assembly} FILENOTFOUND. SKIPPED");
-#endif
+                        DebugMessage($"{assembly} FILENOTFOUND. SKIPPED");
                         continue;
                     }
 #endif
@@ -164,17 +172,25 @@ namespace FastReport.Code.CodeDom.Compiler
                         {
                             if (loadedAssembly.GetName().Name == reference)
                             {
-#if DEBUG
-                                Console.WriteLine("FIND IN AssemblyLoadContext");
-#endif
+                                DebugMessage($"FIND {reference} IN AssemblyLoadContext");
+
                                 string location = loadedAssembly.Location;
+                                DebugMessage($"{reference} location: {location}");
                                 if (string.IsNullOrEmpty(location))
                                 {
                                     result = GetMetadataReferenceInSingleFileApp(loadedAssembly);
                                 }
                                 else
                                 {
-                                    result = MetadataReference.CreateFromFile(location);
+                                    try
+                                    {
+                                        result = MetadataReference.CreateFromFile(location);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        DebugMessage(ex.ToString());
+                                        throw;
+                                    }
                                 }
 
                                 cache[refDll] = result;
@@ -187,9 +203,8 @@ namespace FastReport.Code.CodeDom.Compiler
                     {
                         if (string.Compare(currAssembly.GetName().Name, reference, true) == 0)
                         {
-#if DEBUG
-                            Console.WriteLine("FIND IN AppDomain");
-#endif
+                            DebugMessage("FIND IN AppDomain");
+
                             // Found it, return the location as the full reference.
                             result = MetadataReference.CreateFromFile(currAssembly.Location);
                             cache[refDll] = result;
@@ -202,9 +217,7 @@ namespace FastReport.Code.CodeDom.Compiler
                     {
                         if (name.Name == reference)
                         {
-#if DEBUG
-                            Console.WriteLine("FIND IN ReferencedAssemblies");
-#endif
+                            DebugMessage($"FIND {reference} IN ReferencedAssemblies");
 #if NETCOREAPP
                             // try load Assembly in runtime (for user script with custom assembly)
                             var assembly = AssemblyLoadContext.Default.LoadFromAssemblyName(name);
@@ -256,9 +269,7 @@ namespace FastReport.Code.CodeDom.Compiler
             catch
             {
                 var assemblyName = new AssemblyName(reference);
-#if DEBUG
-                Console.WriteLine("IN AssemblyName");
-#endif
+                DebugMessage("IN AssemblyName");
 
 #if NETCOREAPP
                 // try load Assembly in runtime (for user script with custom assembly)
@@ -267,9 +278,7 @@ namespace FastReport.Code.CodeDom.Compiler
                 var assembly = Assembly.Load(assemblyName);
 #endif
                 string location = assembly.Location;
-#if DEBUG
-                Console.WriteLine($"Location after LoadFromAssemblyName: {location}");
-#endif
+                DebugMessage($"Location after LoadFromAssemblyName: {location}");
 
 #if NETCOREAPP
                 if(string.IsNullOrEmpty(location))
@@ -287,9 +296,7 @@ namespace FastReport.Code.CodeDom.Compiler
 #if NETCOREAPP
         private static unsafe MetadataReference GetMetadataReferenceInSingleFileApp(Assembly assembly)
         {
-#if DEBUG
-            Console.WriteLine($"TRY IN UNSAFE METHOD {assembly.GetName().Name}");
-#endif
+            DebugMessage($"TRY IN UNSAFE METHOD {assembly.GetName().Name}");
             assembly.TryGetRawMetadata(out byte* blob, out int length);
             var moduleMetadata = ModuleMetadata.CreateFromMetadata((IntPtr)blob, length);
             var assemblyMetadata = AssemblyMetadata.Create(moduleMetadata);

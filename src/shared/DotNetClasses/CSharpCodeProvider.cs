@@ -19,15 +19,15 @@ namespace FastReport.Code.CSharp
 
         public override CompilerResults CompileAssemblyFromSource(CompilerParameters cp, string code)
         {
-#if DEBUG
-            Console.WriteLine("FR.Compat: " +
+            DebugMessage(typeof(SyntaxTree).Assembly.FullName);
+
+            DebugMessage("FR.Compat: " +
 #if NETSTANDARD
                 "NETSTANDARD"
 #elif NETCOREAPP
                 "NETCOREAPP"
 #endif
                 );
-#endif
 
             SyntaxTree codeTree = CSharpSyntaxTree.ParseText(code);
             CSharpCompilationOptions options = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary,
