@@ -237,13 +237,27 @@ namespace FastReport.Code.CodeDom.Compiler
                 try
                 {
                     // try load Assembly in runtime (for user script with custom assembly)
-                    AssemblyLoadContext.Default.LoadFromAssemblyPath(refDll);
+                    if (AssemblyLoadContext.CurrentContextualReflectionContext != null)
+                    {
+                        AssemblyLoadContext.CurrentContextualReflectionContext.LoadFromAssemblyPath(refDll);
+                    }
+                    else
+                    {
+                        AssemblyLoadContext.Default.LoadFromAssemblyPath(refDll);
+                    }                    
                 }
                 catch(ArgumentException) {
                     var fullpath = Path.Combine(Environment.CurrentDirectory, refDll);
                     try
                     {
-                        AssemblyLoadContext.Default.LoadFromAssemblyPath(fullpath);
+                        if (AssemblyLoadContext.CurrentContextualReflectionContext != null)
+                        {
+                            AssemblyLoadContext.CurrentContextualReflectionContext.LoadFromAssemblyPath(fullpath);
+                        }
+                        else
+                        {
+                            AssemblyLoadContext.Default.LoadFromAssemblyPath(fullpath);
+                        }                        
                     }
                     catch { }
                 }
@@ -262,7 +276,15 @@ namespace FastReport.Code.CodeDom.Compiler
 
 #if NETCOREAPP
                 // try load Assembly in runtime (for user script with custom assembly)
-                var assembly = AssemblyLoadContext.Default.LoadFromAssemblyName(assemblyName);
+                Assembly assembly;
+                if (AssemblyLoadContext.CurrentContextualReflectionContext != null)
+                {
+                    assembly = AssemblyLoadContext.CurrentContextualReflectionContext.LoadFromAssemblyName(assemblyName);
+                }
+                else
+                {
+                    assembly = AssemblyLoadContext.Default.LoadFromAssemblyName(assemblyName);
+                }              
 #else
                 var assembly = Assembly.Load(assemblyName);
 #endif
