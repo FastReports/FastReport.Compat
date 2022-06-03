@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-#if !(NETSTANDARD2_0 || NETSTANDARD2_1)
+#if !NETSTANDARD
 namespace System.Drawing
 {
     public class ColorExt

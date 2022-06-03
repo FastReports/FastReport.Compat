@@ -42,10 +42,8 @@ namespace FastReport.Code.VisualBasic
                 EmitResult results = compilation.Emit(ms);
                 if (results.Success)
                 {
-                    return new CompilerResults()
-                    {
-                        CompiledAssembly = Assembly.Load(ms.ToArray())
-                    };
+                    var compiledAssembly = Assembly.Load(ms.ToArray());
+                    return new CompilerResults(compiledAssembly);
                 }
                 else
                 {
@@ -54,12 +52,13 @@ namespace FastReport.Code.VisualBasic
                     {
                         if (d.Severity == DiagnosticSeverity.Error)
                         {
+                            var position = d.Location.GetLineSpan().StartLinePosition;
                             result.Errors.Add(new CompilerError()
                             {
                                 ErrorText = d.GetMessage(),
                                 ErrorNumber = d.Id,
-                                Line = d.Location.GetLineSpan().StartLinePosition.Line,
-                                Column = d.Location.GetLineSpan().StartLinePosition.Character
+                                Line = position.Line,
+                                Column = position.Character
                             });
                         }
                     }

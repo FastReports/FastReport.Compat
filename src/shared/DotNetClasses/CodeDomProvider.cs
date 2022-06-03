@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reflection.Metadata;
 using System.Diagnostics;
 using System.ComponentModel;
+using System.Runtime.InteropServices;
 #if NETCOREAPP
 using System.Runtime.Loader;
 #endif
@@ -22,7 +23,15 @@ namespace FastReport.Code.CodeDom.Compiler
         public abstract void Dispose();
         public abstract CompilerResults CompileAssemblyFromSource(CompilerParameters cp, string v);
 
+        /// <summary>
+        /// Throws before compilation emit
+        /// </summary>
         public event EventHandler<CompilationEventArgs> BeforeEmitCompilation;
+
+        /// <summary>
+        /// Manual resolve MetadataReference
+        /// </summary>
+        public static Func<AssemblyName, MetadataReference> ResolveMetadataReference { get; set; }
 
         /// <summary>
         /// For developers only
@@ -35,28 +44,32 @@ namespace FastReport.Code.CodeDom.Compiler
         /// If these assemblies were not found when 'trimmed', then skip them
         /// </summary>
         protected static readonly string[] SkippedAssemblies = new string[] {
-                    "System.dll",
+                    "System",
 
-                    "System.Drawing.dll",
+                    "System.Core",
+
+                    "System.Drawing",
 
                     //"System.Drawing.Primitives",
 
-                    "System.Data.dll",
+                    "System.Data",
 
-                    "System.Xml.dll",
+                    "System.Xml",
+
+                    "System.Private.CoreLib",
                 };
 #endif
 
         private static readonly string[] _additionalAssemblies = new[] {
                 "mscorlib",
                 "netstandard",
+                "System.Core",
                 "System.Collections.Concurrent",
                 "System.Collections",
                 "System.Collections.NonGeneric",
                 "System.Collections.Specialized",
                 "System.ComponentModel",
                 "System.ComponentModel.Primitives",
-                "System.Core",
                 "System.Data.Common",
 #if !SKIA
                 "System.Drawing.Common",
@@ -77,7 +90,8 @@ namespace FastReport.Code.CodeDom.Compiler
         protected static void DebugMessage(string message)
         {
             Debug.WriteLine(message);
-
+            Console.WriteLine(message);
+            
             Log?.Invoke(null, message);
         }
 
@@ -94,16 +108,20 @@ namespace FastReport.Code.CodeDom.Compiler
                     references.Add(metadata);
 #if NETCOREAPP
                 }
-                catch (FileNotFoundException e)
+                catch (FileNotFoundException)
                 {
                     DebugMessage($"{reference} FileNotFound");
-                    if (SkippedAssemblies.Contains(reference))
+
+                    string assemblyName = GetCorrectAssemblyName(reference);
+                    if (SkippedAssemblies.Contains(assemblyName))
                     {
                         DebugMessage($"{reference} FileNotFound. SKIPPED");
                         continue;
                     }
                     else
-                        throw e;
+                    {
+                        throw;
+                    }
                 }
 #endif
 
@@ -114,10 +132,9 @@ namespace FastReport.Code.CodeDom.Compiler
             AddExtraAssemblies(cp.ReferencedAssemblies, references);
         }
 
-
         protected void AddExtraAssemblies(StringCollection referencedAssemblies, List<MetadataReference> references)
         {
-
+            DebugMessage("Add Extra Assemblies...");
             foreach(string assembly in _additionalAssemblies)
             {
                 if (!referencedAssemblies.Contains(assembly))
@@ -126,7 +143,8 @@ namespace FastReport.Code.CodeDom.Compiler
                     try
                     {
 #endif
-                        references.Add(GetReference(assembly));
+                        var metadata = GetReference(assembly);
+                        references.Add(metadata);
 #if NETCOREAPP
                     }
                     // If user run 'dotnet publish' with Trimmed - dotnet cut some extra assemblies.
@@ -145,23 +163,21 @@ namespace FastReport.Code.CodeDom.Compiler
         {
             if (BeforeEmitCompilation != null)
             {
-                var eventArgs = new CompilationEventArgs
-                    { Compilation = compilation };
+                var eventArgs = new CompilationEventArgs(compilation);
                 BeforeEmitCompilation(this, eventArgs);
             }
         }
 
         public MetadataReference GetReference(string refDll)
         {
-            string reference = refDll;
+            if (cache.ContainsKey(refDll))
+                return cache[refDll];
+
             MetadataReference result;
+            string reference = GetCorrectAssemblyName(refDll);
+
             try
             {
-                if (cache.ContainsKey(refDll))
-                    return cache[refDll];
-
-                reference = refDll.EndsWith(".dll") || refDll.EndsWith(".exe") ?
-                    refDll.Substring(0, refDll.Length - 4) : refDll;                
                 if (!refDll.Contains(Path.DirectorySeparatorChar))
                 {
 #if NETCOREAPP
@@ -174,26 +190,9 @@ namespace FastReport.Code.CodeDom.Compiler
                             {
                                 DebugMessage($"FIND {reference} IN AssemblyLoadContext");
 
-                                string location = loadedAssembly.Location;
-                                DebugMessage($"{reference} location: {location}");
-                                if (string.IsNullOrEmpty(location))
-                                {
-                                    result = GetMetadataReferenceInSingleFileApp(loadedAssembly);
-                                }
-                                else
-                                {
-                                    try
-                                    {
-                                        result = MetadataReference.CreateFromFile(location);
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        DebugMessage(ex.ToString());
-                                        throw;
-                                    }
-                                }
+                                result = ProcessAssembly(loadedAssembly);
 
-                                cache[refDll] = result;
+                                AddToCache(refDll, result);
                                 return result;
                             }
                         }
@@ -206,8 +205,8 @@ namespace FastReport.Code.CodeDom.Compiler
                             DebugMessage("FIND IN AppDomain");
 
                             // Found it, return the location as the full reference.
-                            result = MetadataReference.CreateFromFile(currAssembly.Location);
-                            cache[refDll] = result;
+                            result = ProcessAssembly(currAssembly);
+                            AddToCache(refDll, result);
                             return result;
                         }
                     }
@@ -224,21 +223,9 @@ namespace FastReport.Code.CodeDom.Compiler
 #else
                             var assembly = Assembly.Load(name);
 #endif
+                            result = ProcessAssembly(assembly);
 
-                            string location = assembly.Location;
-
-#if NETCOREAPP
-                            if (string.IsNullOrEmpty(location))
-                            {
-                                result = GetMetadataReferenceInSingleFileApp(assembly);
-                            }
-                            else
-#endif
-                            {
-                                result = MetadataReference.CreateFromFile(location);
-                            }
-
-                            cache[refDll] = result;
+                            AddToCache(refDll, result);
                             return result;
                         }
                     }
@@ -262,14 +249,22 @@ namespace FastReport.Code.CodeDom.Compiler
                 }
                 catch { }
 #endif
-                cache[refDll] = result;
-                
+                AddToCache(refDll, result);
+
                 return result;
             }
             catch
             {
-                var assemblyName = new AssemblyName(reference);
                 DebugMessage("IN AssemblyName");
+                var assemblyName = new AssemblyName(reference);
+
+                result = UserResolveMetadataReference(assemblyName);
+                if(result != null)
+                {
+                    DebugMessage($"MetadataReference for assembly {reference} resolved by user");
+                    AddToCache(refDll, result);
+                    return result;
+                }
 
 #if NETCOREAPP
                 // try load Assembly in runtime (for user script with custom assembly)
@@ -277,23 +272,81 @@ namespace FastReport.Code.CodeDom.Compiler
 #else
                 var assembly = Assembly.Load(assemblyName);
 #endif
-                string location = assembly.Location;
-                DebugMessage($"Location after LoadFromAssemblyName: {location}");
+                DebugMessage("After LoadFromAssemblyName");
 
-#if NETCOREAPP
-                if(string.IsNullOrEmpty(location))
-                {
-                    result = GetMetadataReferenceInSingleFileApp(assembly);
-                }
-                else
-#endif
-                    result = MetadataReference.CreateFromFile(location);
-                cache[refDll] = result;
+                result = ProcessAssembly(assembly);
+
+                AddToCache(refDll, result);
                 return result;
             }
         }
 
+        private static MetadataReference UserResolveMetadataReference(AssemblyName assembly)
+        {
+            if (ResolveMetadataReference == null)
+                return null;
+
+            return ResolveMetadataReference(assembly);
+        }
+
+        private static MetadataReference ProcessAssembly(Assembly assembly)
+        {
+            MetadataReference result;
+            DebugMessage($"Location: {assembly.Location}");
+
 #if NETCOREAPP
+            // In SFA location is empty
+            // In WASM location is empty
+            // In Android DEBUG location is correct (not empty)
+            // In Android RELEASE (AOT) location is not empty but incorrect
+            if (SpecialCondition(assembly))
+            {
+                DebugMessage("SpecialCondition is true");
+                result = GetMetadataReferenceSpecialized(assembly);
+                return result;
+            }
+#endif
+            result = MetadataReference.CreateFromFile(assembly.Location);
+
+            return result;
+        }
+
+#if NETCOREAPP
+
+        private static bool SpecialCondition(Assembly assembly)
+        {
+            string location = assembly.Location;
+
+            DebugMessage($"assemblyName Name {assembly.GetName().Name}");
+
+            bool result = string.IsNullOrEmpty(location)
+#if NET6_0_OR_GREATER   // ANDROID_BUILD || IOS_BUILD
+                || location.StartsWith(assembly.GetName().Name)
+#endif
+                ;
+            return result;
+        }
+
+
+        private static MetadataReference GetMetadataReferenceSpecialized(Assembly assembly)
+        {
+            MetadataReference result;
+            try
+            {
+                result = GetMetadataReferenceInSingleFileApp(assembly);
+            }
+            catch (NotImplementedException)
+            {
+                DebugMessage("Not implemented assembly load from SFA");
+#if AOT_COMPILE_FIX
+                result = GetMetadataReferenceFromExternalSource(assembly.GetName());
+#else
+                throw;
+#endif
+            }
+            return result;
+        }
+
         private static unsafe MetadataReference GetMetadataReferenceInSingleFileApp(Assembly assembly)
         {
             DebugMessage($"TRY IN UNSAFE METHOD {assembly.GetName().Name}");
@@ -302,6 +355,25 @@ namespace FastReport.Code.CodeDom.Compiler
             var assemblyMetadata = AssemblyMetadata.Create(moduleMetadata);
             return assemblyMetadata.GetReference();
         }
+
+#if AOT_COMPILE_FIX
+        private static MetadataReference GetMetadataReferenceFromExternalSource(AssemblyName assemblyName)
+        {
+            // try load from external source
+            var stream = KludgeLoader.GetResource(assemblyName);
+            if(stream == null)
+            {
+                DebugMessage("KludgeLoader returned null");
+                throw new FileNotFoundException(
+                    message: "Assembly not found",
+                    fileName: assemblyName.Name);
+            }
+            DebugMessage($"Resource has been received. {stream.Length} {stream.Position}");
+            var metadata = AssemblyMetadata.CreateFromStream(stream);
+            DebugMessage("Metadata has been got");
+            return metadata.GetReference();
+        }
+#endif
 #endif
 
         public static string TryFixReferenceInSingeFileApp(Assembly assembly)
@@ -310,49 +382,32 @@ namespace FastReport.Code.CodeDom.Compiler
             try
             {
                 string assemblyName = assembly.GetName().Name;
-                if(!cache.ContainsKey(assemblyName))
+                if (!cache.ContainsKey(assemblyName))
                 {
-                    MetadataReference metadataReference = GetMetadataReferenceInSingleFileApp(assembly);
-                    cache[assemblyName] = metadataReference;
+                    MetadataReference metadataReference = GetMetadataReferenceSpecialized(assembly);
+                    AddToCache(assemblyName, metadataReference);
                 }
                 return assemblyName;
             }
-            catch
+            catch (Exception ex)
             {
-
+                DebugMessage(ex.ToString());
             }
 #endif
             return null;
         }
 
-        //public IEnumerable<MetadataReference> GetReferences(string[] refsDll)
-        //{
-        //    MetadataReference result;
-        //    AssemblyName[] executingAssemblyReferences = Assembly.GetExecutingAssembly().GetReferencedAssemblies();
+        private static void AddToCache(string refDll, MetadataReference metadata)
+        {
+            cache[refDll] = metadata;
+        }
 
-        //    foreach (string refDll in refsDll)
-        //    {
-        //        string reference = refDll;
-
-        //        if (cache.ContainsKey(refDll))
-        //            yield return MetadataReference.CreateFromFile(cache[refDll]);
-
-        //        foreach (AssemblyName name in executingAssemblyReferences)
-        //        {
-        //            if (name.Name == reference
-        //                || reference.ToLower().EndsWith(".dll")
-        //                && name.Name == reference.Substring(0, reference.Length - 4))
-        //            {
-        //                result = MetadataReference.CreateFromFile(
-        //                    Assembly.Load(name).Location);
-        //                cache[refDll] = reference;
-        //                yield return result;
-        //            }
-
-        //        }
-        //    }
-
-        //}
+        private static string GetCorrectAssemblyName(string reference)
+        {
+            string assemblyName = reference.EndsWith(".dll") || reference.EndsWith(".exe") ?
+                reference.Substring(0, reference.Length - 4) : reference;
+            return assemblyName;
+        }
     }
 }
 #endif
