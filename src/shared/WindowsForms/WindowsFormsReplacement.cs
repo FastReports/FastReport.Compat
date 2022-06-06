@@ -615,7 +615,7 @@ namespace System.Windows.Forms
     public class InvalidateEventArgs : EventArgs
     {
         public Rectangle Rect;
-        public InvalidateEventArgs(Rectangle r) { }
+        public InvalidateEventArgs(Rectangle r) { Rect = r; }
     }
 
     public class DateRangeEventArgs : EventArgs
@@ -636,7 +636,7 @@ namespace System.Windows.Forms
 
     public class FormClosingEventArgs : CancelEventArgs
     {
-        private CloseReason FCloseReason;
+        private readonly CloseReason FCloseReason;
 
         public FormClosingEventArgs(CloseReason closeReason, bool cancel)
           : base(cancel)

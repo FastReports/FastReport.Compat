@@ -13,11 +13,11 @@ namespace System.Drawing
 {
     public class ColorConverter : TypeConverter
     {
-        private static string ColorConstantsLock = "colorConstants";
+        private static readonly string ColorConstantsLock = "colorConstants";
         private static Hashtable colorConstants;
-        private static string SystemColorConstantsLock = "systemColorConstants";
+        private static readonly string SystemColorConstantsLock = "systemColorConstants";
         private static Hashtable systemColorConstants;
-        private static string ValuesLock = "values";
+        private static readonly string ValuesLock = "values";
         private static StandardValuesCollection values;
 
         /// <include file='doc\ColorConverter.uex' path='docs/doc[@for="ColorConverter.ColorConverter"]/*' />
