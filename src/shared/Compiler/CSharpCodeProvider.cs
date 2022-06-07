@@ -62,11 +62,11 @@ namespace FastReport.Code.CSharp
                 EmitResult results = compilation.Emit(ms);
                 if (results.Success)
                 {
+#if DEBUG
                     foreach (Diagnostic d in results.Diagnostics)
-                    {
                         if(d.Severity > DiagnosticSeverity.Hidden)
                             DebugMessage($"Compiler {d.Severity}: {d.GetMessage()}. Line: {d.Location}");
-                    }
+#endif
 
                     var compiledAssembly = Assembly.Load(ms.ToArray());
                     return new CompilerResults(compiledAssembly);
