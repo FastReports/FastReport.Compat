@@ -3,6 +3,7 @@
 
   <PropertyGroup>
     <SlnDir>$(MSBuildThisFileDirectory)..</SlnDir>
+    <BaseOutputPath>$(MSBuildProjectDirectory)\bin</BaseOutputPath>
     <Authors>Fast Reports Inc.</Authors>
     <Product>FastReport</Product>
     <PackageId>FastReport.Compat</PackageId>
