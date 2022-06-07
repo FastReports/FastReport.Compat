@@ -5,33 +5,19 @@ using System.Linq;
 using static CakeScript.Startup;
 using static CakeScript.CakeAPI;
 using Cake.Common.IO;
-using Cake.Common.Tools.DotNetCore.MSBuild;
-using Cake.Common.Tools.NuGet.Pack;
+using Cake.Common.Tools.DotNet.MSBuild;
+using Cake.Common.Tools.DotNet.Pack;
 
 namespace CakeScript;
 
 partial class Program
 {
+
     [DependsOn(nameof(PrepareNuget))]
     public void PackCompatSkia()
     {
         const string packageId = "FastReport.Compat.Skia";
-        string solutionFile = Path.Combine(solutionDirectory, solutionFilename);
-        string usedPackagesVersionPath = Path.Combine(solutionDirectory, "UsedPackages.version");
-        string resourcesDir = Path.Combine(solutionDirectory, "Nuget");
-        string packCopyDir = Path.Combine(resourcesDir, packageId);
-
-        string nugetDir = Path.Combine(solutionDirectory, "bin", IsRelease ? "nuget" : config);
-
-        // Clean nuget directory for package
-        if (DirectoryExists(nugetDir))
-        {
-            DeleteDirectory(nugetDir, new DeleteDirectorySettings
-            {
-                Force = true,
-                Recursive = true
-            });
-        }
+        string projectFile = Path.Combine(solutionDirectory, "src", packageId, packageId + ".csproj");
 
         TargetBuildCore("Clean");
 
@@ -39,72 +25,26 @@ partial class Program
 
         TargetBuildCore("Build");
 
-        TargetBuildCore("PrepareCompatPackage");
-
-        // Get used packages version
-        string FastReportSkiaDrawingVersion = XmlPeek(usedPackagesVersionPath, "//FastReportSkiaDrawingVersion/text()");
-        Information($"FastReport.SkiaDrawing version: {FastReportSkiaDrawingVersion}");
-        string CodeAnalysisCSharpVersion = XmlPeek(usedPackagesVersionPath, "//CodeAnalysisCSharpVersion/text()");
-        Information($"Microsoft.CodeAnalysis.CSharp version: {CodeAnalysisCSharpVersion}");
-        string CodeAnalysisVisualBasicVersion = XmlPeek(usedPackagesVersionPath, "//CodeAnalysisVisualBasicVersion/text()");
-        Information($"Microsoft.CodeAnalysis.VisualBasic version: {CodeAnalysisVisualBasicVersion}");
-
-
-        var dependencies = new List<NuSpecDependency>();
-        AddNuSpecDepCore("FastReport.SkiaDrawing", FastReportSkiaDrawingVersion);
-        AddNuSpecDepCore("Microsoft.CodeAnalysis.CSharp", CodeAnalysisCSharpVersion);
-        AddNuSpecDepCore("Microsoft.CodeAnalysis.VisualBasic", CodeAnalysisVisualBasicVersion);
-
-        var files = new[] {
-           new NuSpecContent{Source = Path.Combine(nugetDir, "**", "*.*"), Target = ""},
-           new NuSpecContent{Source = Path.Combine(packCopyDir, "**", "*.*"), Target = ""},
-        };
-
-        var nuGetPackSettings = new NuGetPackSettings
+        var packSettings = new DotNetPackSettings
         {
-            Id = packageId,
-            Version = version,
-            Authors = new[] { "Fast Reports Inc." },
-            Owners = new[] { "Fast Reports Inc." },
-            Description = "Common compatible types for FastReport .Net, Core and Mono",
-            Repository = new NuGetRepository { Type = "GIT", Url = "https://github.com/FastReports/FastReport.Compat" },
-            ProjectUrl = new Uri("https://www.fast-report.com/en/product/fast-report-net"),
-            Icon = FRLOGO192PNG,
-            IconUrl = new Uri("https://raw.githubusercontent.com/FastReports/FastReport.Compat/master/frlogo-big.png"),
-            ReleaseNotes = new[] { "See the latest changes on https://github.com/FastReports/FastReport.Compat" },
-            License = new NuSpecLicense { Type = "file", Value = "LICENSE.md" },
-            Copyright = "Fast Reports Inc.",
-            Tags = new[] { "reporting", "reports", "pdf", "html", "mvc", "docx", "xlsx", "Core" },
-            RequireLicenseAcceptance = true,
-            Symbols = false,
-            NoPackageAnalysis = true,
-            Files = files,
-            Dependencies = dependencies,
-            BasePath = nugetDir,
-            OutputDirectory = outdir
+            NoBuild = true,
+            NoRestore = true,
+            Configuration = config,
+            OutputDirectory = outdir,
+            MSBuildSettings = new DotNetMSBuildSettings
+            {
+                Version = version,
+            }
         };
 
-        // Pack
-        NuGetPack(nuGetPackSettings);
+        DotNetPack(projectFile, packSettings);
+
 
         // Local functions:
 
-        // For Net Standard 2.0, Standard 2.1, Core 3.0
-        void AddNuSpecDepCore(string id, string version)
-        {
-            AddNuSpecDep(id, version, tfmStandard20);
-            AddNuSpecDep(id, version, tfmStandard21);
-            AddNuSpecDep(id, version, tfmCore30);
-        }
-
-        void AddNuSpecDep(string id, string version, string tfm)
-        {
-            dependencies.Add(new NuSpecDependency { Id = id, Version = version, TargetFramework = tfm });
-        }
-
         void TargetBuildCore(string target)
         {
-            DotNetMSBuild(solutionFile, new DotNetCoreMSBuildSettings()
+            DotNetMSBuild(projectFile, new DotNetMSBuildSettings()
               .SetConfiguration(config)
               .WithTarget(target)
               .WithProperty("SolutionDir", solutionDirectory)
@@ -112,6 +52,6 @@ partial class Program
               .WithProperty("Version", version)
             );
         }
-
     }
+
 }

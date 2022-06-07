@@ -5,8 +5,10 @@ using System.Linq;
 using static CakeScript.Startup;
 using static CakeScript.CakeAPI;
 using Cake.Common.IO;
-using Cake.Common.Tools.DotNetCore.MSBuild;
+using Cake.Common.Tools.DotNet.MSBuild;
 using Cake.Common.Tools.NuGet.Pack;
+using Cake.Common.Tools.DotNet.Build;
+using Cake.Common.Tools.DotNet;
 
 namespace CakeScript;
 
@@ -16,32 +18,46 @@ partial class Program
     public void PackCompat()
     {
         const string packageId = "FastReport.Compat";
-        string solutionFile = Path.Combine(solutionDirectory, solutionFilename);
         string usedPackagesVersionPath = Path.Combine(solutionDirectory, "UsedPackages.version");
         string resourcesDir = Path.Combine(solutionDirectory, "Nuget");
         string packCopyDir = Path.Combine(resourcesDir, packageId);
 
-        string nugetDir = Path.Combine(solutionDirectory, "bin", IsRelease ? "nuget" : config);
+        string srcDir = Path.Combine(solutionDirectory, "src");
+        string compatAnyDir = Path.Combine(srcDir, packageId);
+        string compatAnyProj = Path.Combine(compatAnyDir, packageId + ".csproj");
+        string compatWinDir = Path.Combine(srcDir, packageId + "-Windows");
+        string compatWinProj = Path.Combine(compatWinDir, packageId + "-Windows.csproj");
 
-        // Clean nuget directory for package
-        if (DirectoryExists(nugetDir))
+        string tmpDir = Path.Combine(solutionDirectory, "tmp");
+
+        if (DirectoryExists(tmpDir))
         {
-            DeleteDirectory(nugetDir, new DeleteDirectorySettings
+            DeleteDirectory(tmpDir, new DeleteDirectorySettings
             {
                 Force = true,
                 Recursive = true
             });
         }
 
-        TargetBuildCore("Clean");
+        DotNetClean(compatAnyProj);
+        DotNetClean(compatWinProj);
 
-        TargetBuildCore("Restore");
+        var buildSettings = new DotNetBuildSettings
+        {
+            Configuration = config,
+            NoRestore = false,
+            MSBuildSettings = new DotNetMSBuildSettings
+            {
+                Version = version,
+            }.WithProperty("SolutionDir", solutionDirectory)
+            .WithProperty("SolutionFileName", solutionFilename)
+            .WithProperty("BaseOutputPath", tmpDir),
+        };
 
-        TargetBuildCore("Build");
+        DotNetBuild(compatAnyProj, buildSettings);
+        DotNetBuild(compatWinProj, buildSettings);
 
-        TargetBuildCore("PrepareCompatPackage");
-        
-        string emptyFilePath = Path.Combine(nugetDir, "lib", "netcoreapp3.0", "_._");
+        string emptyFilePath = Path.Combine(tmpDir, "lib", "netcoreapp3.0", "_._");
         Directory.GetParent(emptyFilePath).Create();
         File.Create(emptyFilePath).Close();
 
@@ -66,9 +82,12 @@ partial class Program
         AddNuSpecDepCore("Microsoft.CodeAnalysis.CSharp", CodeAnalysisCSharpVersion);
         AddNuSpecDepCore("Microsoft.CodeAnalysis.VisualBasic", CodeAnalysisVisualBasicVersion);
 
+        const string license = "LICENSE.md";
         var files = new[] {
-           new NuSpecContent{Source = Path.Combine(nugetDir, "**", "*.*"), Target = ""},
+           new NuSpecContent{Source = Path.Combine(tmpDir, "**", "*.*"), Target = ""},
            new NuSpecContent{Source = Path.Combine(packCopyDir, "**", "*.*"), Target = ""},
+           new NuSpecContent{Source = Path.Combine(solutionDirectory, FRLOGO192PNG), Target = "" },
+           new NuSpecContent{Source = Path.Combine(solutionDirectory, license), Target = "" },
         };
 
         var nuGetPackSettings = new NuGetPackSettings
@@ -83,7 +102,7 @@ partial class Program
             Icon = FRLOGO192PNG,
             IconUrl = new Uri("https://raw.githubusercontent.com/FastReports/FastReport.Compat/master/frlogo-big.png"),
             ReleaseNotes = new[] { "See the latest changes on https://github.com/FastReports/FastReport.Compat" },
-            License = new NuSpecLicense { Type = "file", Value = "LICENSE.md" },
+            License = new NuSpecLicense { Type = "file", Value = license },
             Copyright = "Fast Reports Inc.",
             Tags = new[] { "reporting", "reports", "pdf", "html", "mvc", "docx", "xlsx", "Core" },
             RequireLicenseAcceptance = true,
@@ -91,7 +110,7 @@ partial class Program
             NoPackageAnalysis = true,
             Files = files,
             Dependencies = dependencies,
-            BasePath = nugetDir,
+            BasePath = tmpDir,
             OutputDirectory = outdir
         };
 
@@ -113,17 +132,6 @@ partial class Program
         void AddNuSpecDep(string id, string version, string tfm)
         {
             dependencies.Add(new NuSpecDependency { Id = id, Version = version, TargetFramework = tfm });
-        }
-
-        void TargetBuildCore(string target)
-        {
-            DotNetMSBuild(solutionFile, new DotNetCoreMSBuildSettings()
-              .SetConfiguration(config)
-              .WithTarget(target)
-              .WithProperty("SolutionDir", solutionDirectory)
-              .WithProperty("SolutionFileName", solutionFilename)
-              .WithProperty("Version", version)
-            );
         }
 
     }
