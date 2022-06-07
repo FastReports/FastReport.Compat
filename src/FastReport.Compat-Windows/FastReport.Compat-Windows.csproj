@@ -14,7 +14,7 @@
   </PropertyGroup>
 
   <!--Explicit import Directory.Build.props (for old-style csproj)-->
-  <Import Project="..\..\Directory.Build.props" Condition="'$(UsingMicrosoftNETSdk)' != 'true'"/>
+  <Import Project="..\Directory.Build.props" Condition="'$(UsingMicrosoftNETSdk)' != 'true'"/>
 
   <PropertyGroup Condition="'$(TargetFramework)'!='netcoreapp3.0'">
     <OutputPath>$(BaseOutputPath)\lib</OutputPath>
@@ -28,7 +28,7 @@
     <OutDir>$(BaseOutputPath)\build\$(TargetFramework)\lib\Win</OutDir>
   </PropertyGroup>
 
-  <Import Project="$(SlnDir)UsedPackages.version"/>
+  <Import Project="$(SlnDir)\UsedPackages.version"/>
   <ItemGroup Condition="'$(TargetFramework)'!='net40'">
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(CodeAnalysisCSharpVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="$(CodeAnalysisVisualBasicVersion)" />

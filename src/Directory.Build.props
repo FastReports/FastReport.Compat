@@ -2,8 +2,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <SlnDir>$(MSBuildThisFileDirectory)</SlnDir>
-    <BaseOutputPath>$(SlnDir)bin</BaseOutputPath>
+    <SlnDir>$(MSBuildThisFileDirectory)..</SlnDir>
     <Authors>Fast Reports Inc.</Authors>
     <Product>FastReport</Product>
     <PackageId>FastReport.Compat</PackageId>
@@ -14,12 +13,12 @@
     <RepositoryUrl>https://github.com/FastReports/FastReport.Compat</RepositoryUrl>
     <RepositoryType>GIT</RepositoryType>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Description>Common compatible types for FastReport.Net</Description>
-    <PackageIcon>frlogo-big.png</PackageIcon>
+    <Description>Common compatible types for FastReport .Net, Core and Mono</Description>
+    <PackageIcon>frlogo192.png</PackageIcon>
     <PackageIconUrl />
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>$(SlnDir)FastReport.OpenSource.snk</AssemblyOriginatorKeyFile>
-    <SourceCode>$(SlnDir)src\shared</SourceCode>
+    <AssemblyOriginatorKeyFile>$(SlnDir)\FastReport.OpenSource.snk</AssemblyOriginatorKeyFile>
+    <SourceCode>$(MSBuildThisFileDirectory)shared</SourceCode>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
@@ -33,24 +32,19 @@
     <Compile Include="$(SourceCode)\**\*.cs"/>
   </ItemGroup>
 
-
-  <PropertyGroup Condition="'$(Configuration)'=='Release'">
-    <BaseOutputPath>$(BaseOutputPath)\nuget</BaseOutputPath>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
-    <BaseOutputPath>$(BaseOutputPath)\Debug</BaseOutputPath>
-  </PropertyGroup>
-
-
   <ItemGroup>
-    <None Include="$(SlnDir)frlogo192.png">
+    <None Include="$(SlnDir)\frlogo192.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
-    <None Include="$(SlnDir)LICENSE.md">
+    <None Include="$(SlnDir)\LICENSE.md">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
+    </None>
+    <None Include="$(SlnDir)\Nuget\$(PackageId)\**">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+      <Visible>false</Visible>
     </None>
   </ItemGroup>
 

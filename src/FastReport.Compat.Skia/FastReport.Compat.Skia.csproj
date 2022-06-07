@@ -16,6 +16,8 @@
 
     <_IncludeAotCompilationFix>false</_IncludeAotCompilationFix>
     <_IncludeAotCompilationFix Condition="$(TargetFramework.Contains('net6.0'))">true</_IncludeAotCompilationFix>
+
+    <Description>Common compatible types for FastReport.Core with Skia</Description>
   </PropertyGroup>
 
   <!--<PropertyGroup Condition="$(TargetFramework)=='net6.0'">
@@ -25,12 +27,8 @@
   <PropertyGroup Condition="$(_IncludeAotCompilationFix)">
     <DefineConstants>$(DefineConstants);AOT_COMPILE_FIX</DefineConstants>
   </PropertyGroup>
-  
-  <PropertyGroup>
-    <OutputPath>$(BaseOutputPath)\lib</OutputPath>
-  </PropertyGroup>
 
-  <Import Project="$(SlnDir)UsedPackages.version" />
+  <Import Project="$(SlnDir)\UsedPackages.version" />
   <ItemGroup>
     <PackageReference Include="FastReport.SkiaDrawing" Version="$(FastReportSkiaDrawingVersion)" Condition="!$(DebugFRDrawing)" />
   </ItemGroup>
