@@ -304,6 +304,46 @@ namespace FastReport
         }
         #endregion
 
+        #region Fill And Draw
+
+        public void FillAndDrawPath(Pen pen, Brush brush, GraphicsPath path)
+        {
+            FillPath(brush, path);
+            DrawPath(pen, path);
+        }
+
+        public void FillAndDrawEllipse(Pen pen, Brush brush, RectangleF rect)
+        {
+            FillEllipse(brush, rect);
+            DrawEllipse(pen, rect);
+        }
+
+        public void FillAndDrawEllipse(Pen pen, Brush brush, float left, float top, float width, float height)
+        {
+            FillEllipse(brush, left, top, width, height);
+            DrawEllipse(pen, left, top, width, height);
+        }
+
+        public void FillAndDrawPolygon(Pen pen, Brush brush, Point[] points)
+        {
+            FillPolygon(brush, points);
+            DrawPolygon(pen, points);
+        }
+
+        public void FillAndDrawPolygon(Pen pen, Brush brush, PointF[] points)
+        {
+            FillPolygon(brush, points);
+            DrawPolygon(pen, points);
+        }
+
+        public void FillAndDrawRectangle(Pen pen, Brush brush, float left, float top, float width, float height)
+        {
+            FillRectangle(brush, left, top, width, height);
+            DrawRectangle(pen, left, top, width, height);
+        }
+
+        #endregion
+
         #region Transform
         public void MultiplyTransform(System.Drawing.Drawing2D.Matrix matrix, MatrixOrder order)
         {

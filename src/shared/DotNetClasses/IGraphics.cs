@@ -81,6 +81,17 @@ namespace FastReport
         void FillRegion(Brush brush, Region region);
         #endregion
 
+        #region Fill and Draw
+
+        void FillAndDrawPath(Pen pen, Brush brush, GraphicsPath path);
+        void FillAndDrawEllipse(Pen pen, Brush brush, RectangleF rect);
+        void FillAndDrawEllipse(Pen pen, Brush brush, float left, float top, float width, float height);
+        void FillAndDrawPolygon(Pen pen, Brush brush, Point[] points);
+        void FillAndDrawPolygon(Pen pen, Brush brush, PointF[] points);
+        void FillAndDrawRectangle(Pen pen, Brush brush, float left, float top, float width, float height);
+
+        #endregion
+
         #region Transform
         void MultiplyTransform(System.Drawing.Drawing2D.Matrix matrix, MatrixOrder prepend);
         void RotateTransform(float angle);
