@@ -64,6 +64,12 @@ partial class Program
         if (!File.Exists(emptyFilePath))
             throw new Exception($"Empty file wasn't created. '{emptyFilePath}'");
 
+        // Runtime library
+        string runtimeLib = Path.Combine(tmpDir, "runtimes", "any", "lib", "netcoreapp3.0");
+        Directory.CreateDirectory(runtimeLib);
+        string buildAnyLib = Path.Combine(tmpDir, "build", "netcoreapp3.0", "lib", "Any", "*.dll");
+        CopyFiles(buildAnyLib, runtimeLib);
+
         // Get used packages version
         string SystemDrawingCommonVersion = XmlPeek(usedPackagesVersionPath, "//SystemDrawingCommonVersion/text()");
         Information($"System.Drawing.Common version: {SystemDrawingCommonVersion}");
