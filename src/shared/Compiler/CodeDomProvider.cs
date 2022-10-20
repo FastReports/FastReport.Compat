@@ -99,7 +99,7 @@ namespace FastReport.Code.CodeDom.Compiler
         {
             foreach (string reference in cp.ReferencedAssemblies)
             {
-                DebugMessage($"TRY ADD {reference}.");
+                DebugMessage($"TRY ADD '{reference}'");
 #if NETCOREAPP
                 try
                 {
@@ -338,11 +338,10 @@ namespace FastReport.Code.CodeDom.Compiler
             catch (NotImplementedException)
             {
                 DebugMessage("Not implemented assembly load from SFA");
-#if AOT_COMPILE_FIX
                 result = GetMetadataReferenceFromExternalSource(assembly.GetName());
-#else
-                throw;
-#endif
+
+                if(result == null)
+                    throw;
             }
             return result;
         }
@@ -356,24 +355,16 @@ namespace FastReport.Code.CodeDom.Compiler
             return assemblyMetadata.GetReference();
         }
 
-#if AOT_COMPILE_FIX
         private static MetadataReference GetMetadataReferenceFromExternalSource(AssemblyName assemblyName)
         {
             // try load from external source
-            var stream = KludgeLoader.GetResource(assemblyName);
-            if(stream == null)
-            {
-                DebugMessage("KludgeLoader returned null");
-                throw new FileNotFoundException(
-                    message: "Assembly not found",
-                    fileName: assemblyName.Name);
-            }
-            DebugMessage($"Resource has been received. {stream.Length} {stream.Position}");
-            var metadata = AssemblyMetadata.CreateFromStream(stream);
+            var metadata = UserResolveMetadataReference(assemblyName);
+            if (metadata == null)
+                return null;
+
             DebugMessage("Metadata has been got");
-            return metadata.GetReference();
+            return metadata;
         }
-#endif
 #endif
 
         public static string TryFixReferenceInSingeFileApp(Assembly assembly)
