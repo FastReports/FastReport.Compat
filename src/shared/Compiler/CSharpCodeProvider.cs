@@ -59,6 +59,7 @@ namespace FastReport.Code.CSharp
             using (MemoryStream ms = new MemoryStream())
             {
                 DebugMessage("Emit...");
+                //DebugMessage(code);
                 EmitResult results = compilation.Emit(ms);
                 if (results.Success)
                 {
