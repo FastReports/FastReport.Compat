@@ -744,6 +744,13 @@ namespace System.Windows.Forms
         public Point Location;
         public Size Size;
 
+        public Padding Padding { get; set; }
+
+        /// <summary>
+        /// Gets the rectangle that represents the display area of the control.
+        /// </summary>
+        public virtual Rectangle DisplayRectangle { get; set; }
+
         public IntPtr Handle = IntPtr.Zero;
 
         public event EventHandler Click;                                                    //

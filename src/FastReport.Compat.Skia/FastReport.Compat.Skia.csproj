@@ -3,9 +3,6 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard2.1;netcoreapp3.0;net6.0</TargetFrameworks>
 
-    
-    <!--<TargetFrameworks>$(TargetFrameworks);net6.0-android;net6.0-ios</TargetFrameworks>-->
-
     <AssemblyName>FastReport.Compat.Skia</AssemblyName>
     <PackageId>$(AssemblyName)</PackageId>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -14,9 +11,6 @@
     <!--If 'true' then excludes FastReport.SkiaDrawing package and adds reference to local source code-->
     <DebugFRDrawing>false</DebugFRDrawing>
 
-    <_IncludeAotCompilationFix>false</_IncludeAotCompilationFix>
-    <!--<_IncludeAotCompilationFix Condition="$(TargetFramework.Contains('net6.0'))">true</_IncludeAotCompilationFix>-->
-
     <Description>Common compatible types for FastReport.Core with Skia</Description>
   </PropertyGroup>
 
@@ -24,28 +18,19 @@
     <ProduceOnlyReferenceAssembly>true</ProduceOnlyReferenceAssembly>
   </PropertyGroup>-->
 
-  <PropertyGroup Condition="$(_IncludeAotCompilationFix)">
-    <DefineConstants>$(DefineConstants);AOT_COMPILE_FIX</DefineConstants>
-  </PropertyGroup>
-
   <Import Project="$(SlnDir)\UsedPackages.version" />
   <ItemGroup>
     <PackageReference Include="FastReport.SkiaDrawing" Version="$(FastReportSkiaDrawingVersion)" Condition="!$(DebugFRDrawing)" />
   </ItemGroup>
 
-  <ItemGroup Condition="$(TargetFramework)!='net6.0'">
+  <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(CodeAnalysisCSharpVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="$(CodeAnalysisVisualBasicVersion)" />
   </ItemGroup>
   <ItemGroup Condition="$(TargetFramework)=='net6.0'">
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.3.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="4.3.0" />
+    <PackageReference Update="Microsoft.CodeAnalysis.CSharp" Version="4.3.1" />
+    <PackageReference Update="Microsoft.CodeAnalysis.VisualBasic" Version="4.3.1" />
   </ItemGroup>
-
-  <ItemGroup Condition="$(_IncludeAotCompilationFix)">
-    <PackageReference Include="FRKludgeLoader" Version="2022.2.2-dev" />
-  </ItemGroup>
-
 
   <ItemGroup Condition="$(DebugFRDrawing)">
     <ProjectReference Include="..\..\..\FastReport.Drawing\src\FastReport.SkiaDrawing.csproj" />
