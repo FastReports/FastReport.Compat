@@ -338,7 +338,8 @@ namespace FastReport.Code.CodeDom.Compiler
             catch (NotImplementedException)
             {
                 DebugMessage("Not implemented assembly load from SFA");
-                result = GetMetadataReferenceFromExternalSource(assembly.GetName());
+                // try load from external source
+                result = UserResolveMetadataReference(assembly.GetName());
 
                 if(result == null)
                     throw;
@@ -355,16 +356,6 @@ namespace FastReport.Code.CodeDom.Compiler
             return assemblyMetadata.GetReference();
         }
 
-        private static MetadataReference GetMetadataReferenceFromExternalSource(AssemblyName assemblyName)
-        {
-            // try load from external source
-            var metadata = UserResolveMetadataReference(assemblyName);
-            if (metadata == null)
-                return null;
-
-            DebugMessage("Metadata has been got");
-            return metadata;
-        }
 #endif
 
         public static string TryFixReferenceInSingeFileApp(Assembly assembly)
