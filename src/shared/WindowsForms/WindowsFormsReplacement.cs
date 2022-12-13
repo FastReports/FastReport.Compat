@@ -1267,6 +1267,7 @@ namespace System.Windows.Forms
             {
                 if (this.borderStyle == value)
                     return;
+				
                 this.borderStyle = value;
             }
         }
