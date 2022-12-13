@@ -1271,7 +1271,7 @@ namespace System.Windows.Forms
             get
             {
                 return new Size(200,
-                    100);    // Approximate value, may be incorrect
+                    100);
             }
         }
     }
