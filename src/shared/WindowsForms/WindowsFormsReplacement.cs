@@ -632,6 +632,23 @@ namespace System.Windows.Forms
 
     public class ItemCheckEventArgs : EventArgs
     {
+        public ItemCheckEventArgs()
+        {
+
+        }
+
+        public ItemCheckEventArgs(int index, CheckState newCheckValue, CheckState currentValue)
+        {
+            Index = index;
+            NewValue = newCheckValue;
+            CurrentValue = currentValue;
+        }
+
+        public int Index { get; }
+
+        public CheckState NewValue { get; set; }
+
+        public CheckState CurrentValue { get; }
     }
 
     public class FormClosingEventArgs : CancelEventArgs
