@@ -1250,6 +1250,38 @@ namespace System.Windows.Forms
         }
     }
 
+    public class Panel : ScrollableControl
+    {
+        private BorderStyle borderStyle;
+
+        /// <summary>Initializes a new instance of the <see cref="T:System.Windows.Forms.Panel" /> class.</summary>
+        public Panel()
+        {
+            this.TabStop = false;
+        }
+
+        public BorderStyle BorderStyle
+        {
+            get => this.borderStyle;
+            set
+            {
+                if (this.borderStyle == value)
+                    return;
+                this.borderStyle = value;
+            }
+        }
+
+        protected override Size DefaultSize
+        {
+            get
+            {
+                return new Size(200,
+                    20);    // Approximate value, may be incorrect
+            }
+        }
+    }
+
+
     public class DateTimePicker : Control
     {
         public event EventHandler ValueChanged;
