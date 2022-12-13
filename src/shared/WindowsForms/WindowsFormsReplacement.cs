@@ -1263,13 +1263,7 @@ namespace System.Windows.Forms
         public BorderStyle BorderStyle
         {
             get => this.borderStyle;
-            set
-            {
-                if (this.borderStyle == value)
-                    return;
-				
-                this.borderStyle = value;
-            }
+            set => this.borderStyle = value;
         }
 
         protected override Size DefaultSize
@@ -1277,7 +1271,7 @@ namespace System.Windows.Forms
             get
             {
                 return new Size(200,
-                    20);    // Approximate value, may be incorrect
+                    100);    // Approximate value, may be incorrect
             }
         }
     }
