@@ -33,7 +33,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="$(DebugFRDrawing)">
-    <ProjectReference Include="..\..\..\FastReport.Drawing\src\FastReport.SkiaDrawing.csproj" />
+    <ProjectReference Include="..\..\..\FastReport.SkiaDrawing\src\FastReport.SkiaDrawing.csproj" />
   </ItemGroup>
 
 </Project>
