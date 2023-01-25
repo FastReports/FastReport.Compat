@@ -25,12 +25,13 @@ namespace FastReport.Code.VisualBasic
             VisualBasicCompilationOptions options = new VisualBasicCompilationOptions(
                 OutputKind.DynamicallyLinkedLibrary,
                 true,
+                embedVbCoreRuntime: true,
                 optimizationLevel: OptimizationLevel.Release,
                 generalDiagnosticOption: ReportDiagnostic.Default);
 
             Compilation compilation = VisualBasicCompilation.Create(
                 "_" + Guid.NewGuid().ToString("D"), new SyntaxTree[] { codeTree },
-                references: references, options: options.WithEmbedVbCoreRuntime(true)
+                references: references, options: options
                 );
             return compilation;
         }
