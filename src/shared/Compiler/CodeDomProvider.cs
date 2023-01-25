@@ -658,8 +658,10 @@ namespace FastReport.Code.CodeDom.Compiler
             DebugMessage(typeof(SyntaxTree).Assembly.FullName);
 
 #if NET6_0_OR_GREATER
-            DebugMessage($"{RuntimeInformation.RuntimeIdentifier} {RuntimeInformation.ProcessArchitecture} " +
-                $"{RuntimeInformation.OSArchitecture} {RuntimeInformation.OSDescription}");
+            DebugMessage($"rid: {RuntimeInformation.RuntimeIdentifier} " +
+                            $"arch: {RuntimeInformation.ProcessArchitecture} " +
+                            $"os-arch: {RuntimeInformation.OSArchitecture} " +
+                            $"os: {RuntimeInformation.OSDescription}");
 #endif
 
             DebugMessage("FR.Compat: " +
@@ -693,8 +695,10 @@ namespace FastReport.Code.CodeDom.Compiler
             DebugMessage(typeof(SyntaxTree).Assembly.FullName);
 
 #if NET6_0_OR_GREATER
-            DebugMessage($"{RuntimeInformation.RuntimeIdentifier} {RuntimeInformation.ProcessArchitecture} " +
-                $"{RuntimeInformation.OSArchitecture} {RuntimeInformation.OSDescription}");
+            DebugMessage($"rid: {RuntimeInformation.RuntimeIdentifier} " +
+                $"arch: {RuntimeInformation.ProcessArchitecture} " +
+                $"os-arch: {RuntimeInformation.OSArchitecture} " +
+                $"os: {RuntimeInformation.OSDescription}");
 #endif
 
             DebugMessage("FR.Compat: " +
