@@ -13,7 +13,6 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.Emit;
-using Microsoft.CodeAnalysis.CSharp;
 #if NETCOREAPP
 using System.Runtime.Loader;
 #endif
@@ -33,13 +32,14 @@ namespace FastReport.Code.CodeDom.Compiler
         /// <summary>
         /// Manual resolve MetadataReference
         /// </summary>
+        [Obsolete("Use AssemblyLoadResolver")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public static Func<AssemblyName, MetadataReference> ResolveMetadataReference { get; set; }
 
         /// <summary>
         /// Manual resolve MetadataReference
         /// </summary>
-        public static Func<AssemblyName, CancellationToken, Task<MetadataReference>> ResolveMetadataReferenceAsync { get; set; }
-
+        public static IAssemblyLoadResolver AssemblyLoadResolver { get; set; }
 
         /// <summary>
         /// For developers only
@@ -51,7 +51,7 @@ namespace FastReport.Code.CodeDom.Compiler
         /// <summary>
         /// If these assemblies were not found when 'trimmed', then skip them
         /// </summary>
-        protected static readonly string[] SkippedAssemblies = new string[] {
+        private static readonly string[] SkippedAssemblies = new string[] {
                     "System",
 
                     "System.Core",
@@ -357,6 +357,8 @@ namespace FastReport.Code.CodeDom.Compiler
 
         private static async ValueTask<MetadataReference> GetReferenceAsync(string refDll, CancellationToken cancellationToken)
         {
+            DebugMessage($"GetReferenceAsync: {refDll}");
+
             if (cache.ContainsKey(refDll))
                 return cache[refDll];
 
@@ -471,6 +473,11 @@ namespace FastReport.Code.CodeDom.Compiler
 
         private static MetadataReference UserResolveMetadataReference(AssemblyName assembly)
         {
+            if(AssemblyLoadResolver != null)
+            {
+                return AssemblyLoadResolver.LoadManagedLibrary(assembly);
+            }
+
             if (ResolveMetadataReference == null)
                 return null;
 
@@ -479,10 +486,12 @@ namespace FastReport.Code.CodeDom.Compiler
 
         private static async ValueTask<MetadataReference> UserResolveMetadataReferenceAsync(AssemblyName assembly, CancellationToken ct)
         {
-            if (ResolveMetadataReferenceAsync == null)
-                return null;
+            if (AssemblyLoadResolver != null)
+            {
+                return await AssemblyLoadResolver.LoadManagedLibraryAsync(assembly, ct);
+            }
 
-            return await ResolveMetadataReferenceAsync(assembly, ct);
+            return null;
         }
 
         private static MetadataReference ProcessAssembly(Assembly assembly)
@@ -511,6 +520,7 @@ namespace FastReport.Code.CodeDom.Compiler
         {
             MetadataReference result;
             DebugMessage($"Location: {assembly.Location}");
+
 
 #if NETCOREAPP
             // In SFA location is empty
@@ -656,6 +666,7 @@ namespace FastReport.Code.CodeDom.Compiler
         public CompilerResults CompileAssemblyFromSource(CompilerParameters cp, string code)
         {
             DebugMessage(typeof(SyntaxTree).Assembly.FullName);
+            DebugMessage($"threadId: {Environment.CurrentManagedThreadId}");
 
 #if NET6_0_OR_GREATER
             DebugMessage($"rid: {RuntimeInformation.RuntimeIdentifier} " +
@@ -690,9 +701,10 @@ namespace FastReport.Code.CodeDom.Compiler
             return Emit(compilation);
         }
 
-        public async ValueTask<CompilerResults> CompileAssemblyFromSourceAsync(CompilerParameters cp, string code, CancellationToken cancellationToken)
+        public async Task<CompilerResults> CompileAssemblyFromSourceAsync(CompilerParameters cp, string code, CancellationToken cancellationToken)
         {
             DebugMessage(typeof(SyntaxTree).Assembly.FullName);
+            DebugMessage($"threadId: {Environment.CurrentManagedThreadId}");
 
 #if NET6_0_OR_GREATER
             DebugMessage($"rid: {RuntimeInformation.RuntimeIdentifier} " +
@@ -722,7 +734,7 @@ namespace FastReport.Code.CodeDom.Compiler
             Compilation compilation = CreateCompilation(codeTree, references);
             OnBeforeEmitCompilation(compilation);
 
-            return Emit(compilation, cancellationToken);
+            return await EmitAsync(compilation, cancellationToken);
         }
 
         protected abstract Compilation CreateCompilation(SyntaxTree codeTree, ICollection<MetadataReference> references);
@@ -738,39 +750,58 @@ namespace FastReport.Code.CodeDom.Compiler
             {
                 DebugMessage("Emit...");
                 //DebugMessage(code);
+                DebugMessage($"threadId: {Environment.CurrentManagedThreadId}");
                 EmitResult results = compilation.Emit(ms,
                     cancellationToken: ct);
-                if (results.Success)
-                {
-#if DEBUG
-                    foreach (Diagnostic d in results.Diagnostics)
-                        if (d.Severity > DiagnosticSeverity.Hidden)
-                            DebugMessage($"Compiler {d.Severity}: {d.GetMessage()}. Line: {d.Location}");
-#endif
+                return HandleEmitResult(results, ms);
+            }
+        }
 
-                    var compiledAssembly = Assembly.Load(ms.ToArray());
-                    return new CompilerResults(compiledAssembly);
-                }
-                else
+        private static async Task<CompilerResults> EmitAsync(Compilation compilation, CancellationToken ct = default)
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                DebugMessage("Emit...");
+                //DebugMessage(code);
+                // we use Task.Run because in Wasm Emit throws an exception in current context
+                EmitResult results = await Task.Run(() => compilation.Emit(ms,
+                            cancellationToken: ct), ct);
+                return HandleEmitResult(results, ms);
+            }
+        }
+
+        private static CompilerResults HandleEmitResult(EmitResult results, MemoryStream ms)
+        {
+            if (results.Success)
+            {
+#if DEBUG
+                foreach (Diagnostic d in results.Diagnostics)
+                    if (d.Severity > DiagnosticSeverity.Hidden)
+                        DebugMessage($"Compiler {d.Severity}: {d.GetMessage()}. Line: {d.Location}");
+#endif
+                var compiledAssembly = Assembly.Load(ms.ToArray());
+                return new CompilerResults(compiledAssembly);
+            }
+            else
+            {
+                DebugMessage($"results not success, {ms.Length}");
+                CompilerResults result = new CompilerResults();
+                foreach (Diagnostic d in results.Diagnostics)
                 {
-                    DebugMessage($"results not success, {ms.Length}");
-                    CompilerResults result = new CompilerResults();
-                    foreach (Diagnostic d in results.Diagnostics)
+                    if (d.Severity == DiagnosticSeverity.Error)
                     {
-                        if (d.Severity == DiagnosticSeverity.Error)
+                        DebugMessage(d.GetMessage());
+                        var position = d.Location.GetLineSpan().StartLinePosition;
+                        result.Errors.Add(new CompilerError()
                         {
-                            var position = d.Location.GetLineSpan().StartLinePosition;
-                            result.Errors.Add(new CompilerError()
-                            {
-                                ErrorText = d.GetMessage(),
-                                ErrorNumber = d.Id,
-                                Line = position.Line,
-                                Column = position.Character,
-                            });
-                        }
+                            ErrorText = d.GetMessage(),
+                            ErrorNumber = d.Id,
+                            Line = position.Line,
+                            Column = position.Character,
+                        });
                     }
-                    return result;
                 }
+                return result;
             }
         }
 
