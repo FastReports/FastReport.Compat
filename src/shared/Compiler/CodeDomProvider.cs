@@ -10,6 +10,9 @@ using System.Reflection.Metadata;
 using System.Diagnostics;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.CodeAnalysis.Emit;
 #if NETCOREAPP
 using System.Runtime.Loader;
 #endif
@@ -20,8 +23,6 @@ namespace FastReport.Code.CodeDom.Compiler
     {
         static readonly Dictionary<string, MetadataReference> cache = new Dictionary<string, MetadataReference>();
 
-        public abstract void Dispose();
-        public abstract CompilerResults CompileAssemblyFromSource(CompilerParameters cp, string v);
 
         /// <summary>
         /// Throws before compilation emit
@@ -31,7 +32,14 @@ namespace FastReport.Code.CodeDom.Compiler
         /// <summary>
         /// Manual resolve MetadataReference
         /// </summary>
+        [Obsolete("Use AssemblyLoadResolver")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public static Func<AssemblyName, MetadataReference> ResolveMetadataReference { get; set; }
+
+        /// <summary>
+        /// Manual resolve MetadataReference
+        /// </summary>
+        public static IAssemblyLoadResolver AssemblyLoadResolver { get; set; }
 
         /// <summary>
         /// For developers only
@@ -43,7 +51,7 @@ namespace FastReport.Code.CodeDom.Compiler
         /// <summary>
         /// If these assemblies were not found when 'trimmed', then skip them
         /// </summary>
-        protected static readonly string[] SkippedAssemblies = new string[] {
+        private static readonly string[] SkippedAssemblies = new string[] {
                     "System",
 
                     "System.Core",
@@ -132,6 +140,44 @@ namespace FastReport.Code.CodeDom.Compiler
             AddExtraAssemblies(cp.ReferencedAssemblies, references);
         }
 
+        protected async ValueTask AddReferencesAsync(CompilerParameters cp, List<MetadataReference> references, CancellationToken cancellationToken)
+        {
+            foreach (string reference in cp.ReferencedAssemblies)
+            {
+                DebugMessage($"TRY ADD '{reference}'");
+#if NETCOREAPP
+                try
+                {
+#endif
+                var metadata = await GetReferenceAsync(reference, cancellationToken);
+                references.Add(metadata);
+#if NETCOREAPP
+                }
+                catch (FileNotFoundException)
+                {
+                    DebugMessage($"{reference} FileNotFound");
+
+                    string assemblyName = GetCorrectAssemblyName(reference);
+                    if (SkippedAssemblies.Contains(assemblyName))
+                    {
+                        DebugMessage($"{reference} FileNotFound. SKIPPED");
+                        continue;
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+#endif
+
+                DebugMessage($"{reference} ADDED");
+            }
+            DebugMessage("AFTER ADDING ReferencedAssemblies");
+
+            await AddExtraAssembliesAsync(cp.ReferencedAssemblies, references, cancellationToken);
+        }
+
+
         protected void AddExtraAssemblies(StringCollection referencedAssemblies, List<MetadataReference> references)
         {
             DebugMessage("Add Extra Assemblies...");
@@ -158,6 +204,34 @@ namespace FastReport.Code.CodeDom.Compiler
                 }
             }
         }
+
+        protected async ValueTask AddExtraAssembliesAsync(StringCollection referencedAssemblies, List<MetadataReference> references, CancellationToken ct)
+        {
+            DebugMessage("Add Extra Assemblies...");
+            foreach (string assembly in _additionalAssemblies)
+            {
+                if (!referencedAssemblies.Contains(assembly))
+                {
+#if NETCOREAPP
+                    try
+                    {
+#endif
+                        var metadata = await GetReferenceAsync(assembly, ct);
+                        references.Add(metadata);
+#if NETCOREAPP
+                    }
+                    // If user run 'dotnet publish' with Trimmed - dotnet cut some extra assemblies.
+                    // We skip this error, because some assemblies in 'assemblies' array may not be needed
+                    catch (FileNotFoundException)
+                    {
+                        DebugMessage($"{assembly} FILENOTFOUND. SKIPPED");
+                        continue;
+                    }
+#endif
+                }
+            }
+        }
+
 
         internal void OnBeforeEmitCompilation(Compilation compilation)
         {
@@ -281,12 +355,143 @@ namespace FastReport.Code.CodeDom.Compiler
             }
         }
 
+        private static async ValueTask<MetadataReference> GetReferenceAsync(string refDll, CancellationToken cancellationToken)
+        {
+            DebugMessage($"GetReferenceAsync: {refDll}");
+
+            if (cache.ContainsKey(refDll))
+                return cache[refDll];
+
+            MetadataReference result;
+            string reference = GetCorrectAssemblyName(refDll);
+
+            try
+            {
+                if (!refDll.Contains(Path.DirectorySeparatorChar))
+                {
+#if NETCOREAPP
+                    // try find in AssemblyLoadContext
+                    foreach (AssemblyLoadContext assemblyLoadContext in AssemblyLoadContext.All)
+                    {
+                        foreach (Assembly loadedAssembly in assemblyLoadContext.Assemblies)
+                        {
+                            if (loadedAssembly.GetName().Name == reference)
+                            {
+                                DebugMessage($"FIND {reference} IN AssemblyLoadContext");
+
+                                result = await ProcessAssemblyAsync(loadedAssembly, cancellationToken);
+
+                                AddToCache(refDll, result);
+                                return result;
+                            }
+                        }
+                    }
+#else
+                    foreach (Assembly currAssembly in AppDomain.CurrentDomain.GetAssemblies())
+                    {
+                        if (string.Compare(currAssembly.GetName().Name, reference, true) == 0)
+                        {
+                            DebugMessage("FIND IN AppDomain");
+
+                            // Found it, return the location as the full reference.
+                            result = await ProcessAssemblyAsync(currAssembly, cancellationToken);
+                            AddToCache(refDll, result);
+                            return result;
+                        }
+                    }
+#endif
+                    // try find in ReferencedAssemblies
+                    foreach (AssemblyName name in Assembly.GetExecutingAssembly().GetReferencedAssemblies())
+                    {
+                        if (name.Name == reference)
+                        {
+                            DebugMessage($"FIND {reference} IN ReferencedAssemblies");
+#if NETCOREAPP
+                            // try load Assembly in runtime (for user script with custom assembly)
+                            var assembly = AssemblyLoadContext.Default.LoadFromAssemblyName(name);
+#else
+                            var assembly = Assembly.Load(name);
+#endif
+                            result = await ProcessAssemblyAsync(assembly, cancellationToken);
+
+                            AddToCache(refDll, result);
+                            return result;
+                        }
+                    }
+                }
+
+
+                result = MetadataReference.CreateFromFile(refDll);
+#if NETCOREAPP
+                try
+                {
+                    // try load Assembly in runtime (for user script with custom assembly)
+                    AssemblyLoadContext.Default.LoadFromAssemblyPath(refDll);
+                }
+                catch(ArgumentException) {
+                    var fullpath = Path.Combine(Environment.CurrentDirectory, refDll);
+                    try
+                    {
+                        AssemblyLoadContext.Default.LoadFromAssemblyPath(fullpath);
+                    }
+                    catch { }
+                }
+                catch { }
+#endif
+                AddToCache(refDll, result);
+
+                return result;
+            }
+            catch
+            {
+                DebugMessage("IN AssemblyName");
+                var assemblyName = new AssemblyName(reference);
+
+                result = await UserResolveMetadataReferenceAsync(assemblyName, cancellationToken);
+                if (result != null)
+                {
+                    DebugMessage($"MetadataReference for assembly {reference} resolved by user");
+                    AddToCache(refDll, result);
+                    return result;
+                }
+
+#if NETCOREAPP
+                // try load Assembly in runtime (for user script with custom assembly)
+                var assembly = AssemblyLoadContext.Default.LoadFromAssemblyName(assemblyName);
+#else
+                var assembly = Assembly.Load(assemblyName);
+#endif
+                DebugMessage("After LoadFromAssemblyName");
+
+                result = await ProcessAssemblyAsync(assembly, cancellationToken);
+
+                AddToCache(refDll, result);
+                return result;
+            }
+        }
+
+
         private static MetadataReference UserResolveMetadataReference(AssemblyName assembly)
         {
+            if(AssemblyLoadResolver != null)
+            {
+                return AssemblyLoadResolver.LoadManagedLibrary(assembly);
+            }
+
             if (ResolveMetadataReference == null)
                 return null;
 
             return ResolveMetadataReference(assembly);
+        }
+
+        private static async ValueTask<MetadataReference> UserResolveMetadataReferenceAsync(AssemblyName assembly, CancellationToken ct)
+        {
+            if (AssemblyLoadResolver != null)
+            {
+                return await AssemblyLoadResolver.LoadManagedLibraryAsync(assembly, ct);
+            }
+
+            return null;
         }
 
         private static MetadataReference ProcessAssembly(Assembly assembly)
@@ -310,6 +515,30 @@ namespace FastReport.Code.CodeDom.Compiler
 
             return result;
         }
+
+        private static async ValueTask<MetadataReference> ProcessAssemblyAsync(Assembly assembly, CancellationToken ct)
+        {
+            MetadataReference result;
+            DebugMessage($"Location: {assembly.Location}");
+
+
+#if NETCOREAPP
+            // In SFA location is empty
+            // In WASM location is empty
+            // In Android DEBUG location is correct (not empty)
+            // In Android RELEASE (AOT) location is not empty but incorrect
+            if (SpecialCondition(assembly))
+            {
+                DebugMessage("SpecialCondition is true");
+                result = await GetMetadataReferenceSpecializedAsync(assembly, ct);
+                return result;
+            }
+#endif
+            result = MetadataReference.CreateFromFile(assembly.Location);
+
+            return result;
+        }
+
 
 #if NETCOREAPP
 
@@ -347,6 +576,26 @@ namespace FastReport.Code.CodeDom.Compiler
             return result;
         }
 
+        private static async ValueTask<MetadataReference> GetMetadataReferenceSpecializedAsync(Assembly assembly, CancellationToken ct)
+        {
+            MetadataReference result;
+            try
+            {
+                result = GetMetadataReferenceInSingleFileApp(assembly);
+            }
+            catch (NotImplementedException)
+            {
+                DebugMessage("Not implemented assembly load from SFA");
+                // try load from external source
+                result = await UserResolveMetadataReferenceAsync(assembly.GetName(), ct);
+
+                if (result == null)
+                    throw;
+            }
+            return result;
+        }
+
+
         private static unsafe MetadataReference GetMetadataReferenceInSingleFileApp(Assembly assembly)
         {
             DebugMessage($"TRY IN UNSAFE METHOD {assembly.GetName().Name}");
@@ -379,6 +628,28 @@ namespace FastReport.Code.CodeDom.Compiler
             return null;
         }
 
+        public static async ValueTask<string> TryFixReferenceInSingeFileAppAsync(Assembly assembly, CancellationToken ct)
+        {
+#if NETCOREAPP
+            try
+            {
+                string assemblyName = assembly.GetName().Name;
+                if (!cache.ContainsKey(assemblyName))
+                {
+                    MetadataReference metadataReference = await GetMetadataReferenceSpecializedAsync(assembly, ct);
+                    AddToCache(assemblyName, metadataReference);
+                }
+                return assemblyName;
+            }
+            catch (Exception ex)
+            {
+                DebugMessage(ex.ToString());
+            }
+#endif
+            return null;
+        }
+
+
         private static void AddToCache(string refDll, MetadataReference metadata)
         {
             cache[refDll] = metadata;
@@ -390,6 +661,150 @@ namespace FastReport.Code.CodeDom.Compiler
                 reference.Substring(0, reference.Length - 4) : reference;
             return assemblyName;
         }
+
+
+        public CompilerResults CompileAssemblyFromSource(CompilerParameters cp, string code)
+        {
+            DebugMessage(typeof(SyntaxTree).Assembly.FullName);
+            DebugMessage($"threadId: {Environment.CurrentManagedThreadId}");
+
+#if NET6_0_OR_GREATER
+            DebugMessage($"rid: {RuntimeInformation.RuntimeIdentifier} " +
+                            $"arch: {RuntimeInformation.ProcessArchitecture} " +
+                            $"os-arch: {RuntimeInformation.OSArchitecture} " +
+                            $"os: {RuntimeInformation.OSDescription}");
+#endif
+
+            DebugMessage("FR.Compat: " +
+#if NETSTANDARD
+                "NETSTANDARD"
+#elif NETCOREAPP
+                "NETCOREAPP"
+#endif
+                );
+
+            SyntaxTree codeTree = ParseTree(code);
+
+            List<MetadataReference> references = new List<MetadataReference>();
+
+            AddReferences(cp, references);
+
+            DebugMessage($"References count: {references.Count}");
+            //foreach (var reference in references)
+            //    DebugMessage($"{reference.Display}");
+
+            Compilation compilation = CreateCompilation(codeTree, references);
+
+
+            OnBeforeEmitCompilation(compilation);
+
+            return Emit(compilation);
+        }
+
+        public async Task<CompilerResults> CompileAssemblyFromSourceAsync(CompilerParameters cp, string code, CancellationToken cancellationToken)
+        {
+            DebugMessage(typeof(SyntaxTree).Assembly.FullName);
+            DebugMessage($"threadId: {Environment.CurrentManagedThreadId}");
+
+#if NET6_0_OR_GREATER
+            DebugMessage($"rid: {RuntimeInformation.RuntimeIdentifier} " +
+                $"arch: {RuntimeInformation.ProcessArchitecture} " +
+                $"os-arch: {RuntimeInformation.OSArchitecture} " +
+                $"os: {RuntimeInformation.OSDescription}");
+#endif
+
+            DebugMessage("FR.Compat: " +
+#if NETSTANDARD
+                "NETSTANDARD"
+#elif NETCOREAPP
+                "NETCOREAPP"
+#endif
+                );
+
+            SyntaxTree codeTree = ParseTree(code, cancellationToken);
+
+            List<MetadataReference> references = new List<MetadataReference>();
+
+            await AddReferencesAsync(cp, references, cancellationToken);
+
+            DebugMessage($"References count: {references.Count}");
+            //foreach (var reference in references)
+            //    DebugMessage($"{reference.Display}");
+
+            Compilation compilation = CreateCompilation(codeTree, references);
+            OnBeforeEmitCompilation(compilation);
+
+            return await EmitAsync(compilation, cancellationToken);
+        }
+
+        protected abstract Compilation CreateCompilation(SyntaxTree codeTree, ICollection<MetadataReference> references);
+
+        protected abstract SyntaxTree ParseTree(string text, CancellationToken ct = default);
+
+        public abstract void Dispose();
+
+
+        private static CompilerResults Emit(Compilation compilation, CancellationToken ct = default)
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                DebugMessage("Emit...");
+                //DebugMessage(code);
+                DebugMessage($"threadId: {Environment.CurrentManagedThreadId}");
+                EmitResult results = compilation.Emit(ms,
+                    cancellationToken: ct);
+                return HandleEmitResult(results, ms);
+            }
+        }
+
+        private static async Task<CompilerResults> EmitAsync(Compilation compilation, CancellationToken ct = default)
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                DebugMessage("Emit...");
+                //DebugMessage(code);
+                // we use Task.Run because in Wasm Emit throws an exception in current context
+                EmitResult results = await Task.Run(() => compilation.Emit(ms,
+                            cancellationToken: ct), ct);
+                return HandleEmitResult(results, ms);
+            }
+        }
+
+        private static CompilerResults HandleEmitResult(EmitResult results, MemoryStream ms)
+        {
+            if (results.Success)
+            {
+#if DEBUG
+                foreach (Diagnostic d in results.Diagnostics)
+                    if (d.Severity > DiagnosticSeverity.Hidden)
+                        DebugMessage($"Compiler {d.Severity}: {d.GetMessage()}. Line: {d.Location}");
+#endif
+                var compiledAssembly = Assembly.Load(ms.ToArray());
+                return new CompilerResults(compiledAssembly);
+            }
+            else
+            {
+                DebugMessage($"results not success, {ms.Length}");
+                CompilerResults result = new CompilerResults();
+                foreach (Diagnostic d in results.Diagnostics)
+                {
+                    if (d.Severity == DiagnosticSeverity.Error)
+                    {
+                        DebugMessage(d.GetMessage());
+                        var position = d.Location.GetLineSpan().StartLinePosition;
+                        result.Errors.Add(new CompilerError()
+                        {
+                            ErrorText = d.GetMessage(),
+                            ErrorNumber = d.Id,
+                            Line = position.Line,
+                            Column = position.Character,
+                        });
+                    }
+                }
+                return result;
+            }
+        }
+
     }
 }
 #endif
