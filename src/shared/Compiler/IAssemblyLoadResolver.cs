@@ -1,4 +1,4 @@
-﻿
+﻿#if NETSTANDARD || NETCOREAPP
 using Microsoft.CodeAnalysis;
 
 using System.Reflection;
@@ -15,3 +15,4 @@ namespace FastReport.Code
         Task<MetadataReference> LoadManagedLibraryAsync(AssemblyName assemblyName, CancellationToken ct);
     }
 }
+#endif
