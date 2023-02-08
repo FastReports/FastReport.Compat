@@ -13,6 +13,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.Emit;
+using System.Globalization;
 #if NETCOREAPP
 using System.Runtime.Loader;
 #endif
@@ -662,8 +663,13 @@ namespace FastReport.Code.CodeDom.Compiler
             return assemblyName;
         }
 
-
+        // backward compabilty
         public CompilerResults CompileAssemblyFromSource(CompilerParameters cp, string code)
+        {
+            return CompileAssemblyFromSource(cp, code, null);
+        }
+
+        public CompilerResults CompileAssemblyFromSource(CompilerParameters cp, string code, CultureInfo cultureInfo = null)
         {
             DebugMessage(typeof(SyntaxTree).Assembly.FullName);
             DebugMessage($"threadId: {Environment.CurrentManagedThreadId}");
@@ -698,10 +704,11 @@ namespace FastReport.Code.CodeDom.Compiler
 
             OnBeforeEmitCompilation(compilation);
 
-            return Emit(compilation);
+            return Emit(compilation, cultureInfo);
         }
 
-        public async Task<CompilerResults> CompileAssemblyFromSourceAsync(CompilerParameters cp, string code, CancellationToken cancellationToken)
+
+        public async Task<CompilerResults> CompileAssemblyFromSourceAsync(CompilerParameters cp, string code, CultureInfo cultureInfo = null, CancellationToken cancellationToken = default)
         {
             DebugMessage(typeof(SyntaxTree).Assembly.FullName);
             DebugMessage($"threadId: {Environment.CurrentManagedThreadId}");
@@ -734,7 +741,7 @@ namespace FastReport.Code.CodeDom.Compiler
             Compilation compilation = CreateCompilation(codeTree, references);
             OnBeforeEmitCompilation(compilation);
 
-            return await EmitAsync(compilation, cancellationToken);
+            return await EmitAsync(compilation, cultureInfo, cancellationToken);
         }
 
         protected abstract Compilation CreateCompilation(SyntaxTree codeTree, ICollection<MetadataReference> references);
@@ -744,20 +751,20 @@ namespace FastReport.Code.CodeDom.Compiler
         public abstract void Dispose();
 
 
-        private static CompilerResults Emit(Compilation compilation, CancellationToken ct = default)
+        private static CompilerResults Emit(Compilation compilation, CultureInfo cultureInfo, CancellationToken ct = default)
         {
             using (MemoryStream ms = new MemoryStream())
             {
                 DebugMessage("Emit...");
                 //DebugMessage(code);
-                DebugMessage($"threadId: {Environment.CurrentManagedThreadId}");
+                DebugMessage($"threadId: {Environment.CurrentManagedThreadId}");                
                 EmitResult results = compilation.Emit(ms,
                     cancellationToken: ct);
-                return HandleEmitResult(results, ms);
+                return HandleEmitResult(results, ms, cultureInfo);
             }
         }
 
-        private static async Task<CompilerResults> EmitAsync(Compilation compilation, CancellationToken ct = default)
+        private static async Task<CompilerResults> EmitAsync(Compilation compilation, CultureInfo cultureInfo, CancellationToken ct = default)
         {
             using (MemoryStream ms = new MemoryStream())
             {
@@ -766,11 +773,11 @@ namespace FastReport.Code.CodeDom.Compiler
                 // we use Task.Run because in Wasm Emit throws an exception in current context
                 EmitResult results = await Task.Run(() => compilation.Emit(ms,
                             cancellationToken: ct), ct);
-                return HandleEmitResult(results, ms);
+                return HandleEmitResult(results, ms, cultureInfo);
             }
         }
 
-        private static CompilerResults HandleEmitResult(EmitResult results, MemoryStream ms)
+        private static CompilerResults HandleEmitResult(EmitResult results, MemoryStream ms, CultureInfo cultureInfo)
         {
             if (results.Success)
             {
@@ -794,7 +801,7 @@ namespace FastReport.Code.CodeDom.Compiler
                         var position = d.Location.GetLineSpan().StartLinePosition;
                         result.Errors.Add(new CompilerError()
                         {
-                            ErrorText = d.GetMessage(),
+                            ErrorText = d.GetMessage(cultureInfo),
                             ErrorNumber = d.Id,
                             Line = position.Line,
                             Column = position.Character,
