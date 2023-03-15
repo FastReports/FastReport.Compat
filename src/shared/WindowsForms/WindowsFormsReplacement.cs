@@ -738,7 +738,7 @@ namespace System.Windows.Forms
                 _parent?.Controls.Add(this);
             }
         }
-        public List<Control> Controls = new List<Control>();
+        public List<Control> Controls { get; } = new List<Control>();
 
         private Control _parent;
         public Cursor Cursor;
@@ -756,9 +756,18 @@ namespace System.Windows.Forms
         public int Width;                                                                   //
         public int Height;                                                                  //
         public static Keys ModifierKeys;
-        public Control ActiveControl;
-        public Rectangle ClientRectangle;
-        public Point Location;
+        public Rectangle ClientRectangle { get; }
+
+        public Point Location
+        {
+            get => new Point(Left, Top);
+            set
+            {
+                Left = Location.X;
+                Top = Location.Y;
+            }
+        }
+
         public Size Size
         {
             get => new Size(Width, Height);
@@ -774,9 +783,9 @@ namespace System.Windows.Forms
         /// <summary>
         /// Gets the rectangle that represents the display area of the control.
         /// </summary>
-        public virtual Rectangle DisplayRectangle { get; set; }
+        public virtual Rectangle DisplayRectangle { get; }
 
-        public IntPtr Handle = IntPtr.Zero;
+        public readonly IntPtr Handle = IntPtr.Zero;
 
         public event EventHandler Click;                                                    //
         public event EventHandler DoubleClick;
@@ -1337,7 +1346,7 @@ namespace System.Windows.Forms
         }
     }
 
-    public class SelectionRange
+    public sealed class SelectionRange
     {
     }
 
@@ -1429,7 +1438,7 @@ namespace System.Windows.Forms
         Inherit = 3
     }
 
-    public class Form : Control
+    public class Form : ScrollableControl
     {
         public event EventHandler Load;
         public event FormClosedEventHandler FormClosed;
@@ -1499,7 +1508,7 @@ namespace System.Windows.Forms
         public void Stop() { }
     }
 
-    public class MessageBox
+    public sealed class MessageBox
     {
         public static DialogResult Show(string text)
         {
@@ -1521,13 +1530,14 @@ namespace System.Windows.Forms
         public static bool HighContrast;
     }
 
-    public class ControlPaint
+    public sealed class ControlPaint
     {
         public static void DrawFocusRectangle(Graphics g, Rectangle r) { }
     }
 
     public class ScrollableControl : Control
     {
+        public Control ActiveControl;
 
     }
 }
