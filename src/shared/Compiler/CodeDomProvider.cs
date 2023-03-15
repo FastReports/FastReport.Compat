@@ -234,7 +234,7 @@ namespace FastReport.Code.CodeDom.Compiler
         }
 
 
-        internal void OnBeforeEmitCompilation(Compilation compilation)
+        private void OnBeforeEmitCompilation(Compilation compilation)
         {
             if (BeforeEmitCompilation != null)
             {
