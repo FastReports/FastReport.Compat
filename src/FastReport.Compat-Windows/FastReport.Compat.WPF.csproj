@@ -1,0 +1,48 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net462;net6.0-windows</TargetFrameworks>
+    <DefineConstants>$(DefineConstants);NETCOREWIN</DefineConstants>
+    <UseWindowsForms>false</UseWindowsForms>
+    <AssemblyName>FastReport.Compat</AssemblyName>
+    <PackageId>FastReport.Compat.WPF</PackageId>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+    <DebugFRForms>true</DebugFRForms>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Demo'">
+    <DefineConstants>$(DefineConstants);Demo</DefineConstants>
+    <PackageId>FastReport.Compat.WPF.Demo</PackageId>
+  </PropertyGroup>
+
+  <Import Project="$(SlnDir)\UsedPackages.version" />
+
+  <ItemGroup Condition="'$(TargetFramework)' != 'net462'">
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(CodeAnalysisCSharpVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="$(CodeAnalysisVisualBasicVersion)" />
+    <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="$(SourceCode)\WindowsForms\**\*.cs" />
+    <Compile Remove="$(SourceCode)\DotNetClasses\UITypeEditor.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)' != 'Demo'">
+    <PackageReference Include="FastReport.Forms.WPF" Version="$(FRFormsWPFVersion)" Condition="!$(DebugFRForms)">
+      <PrivateAssets>compile</PrivateAssets>
+    </PackageReference>
+    <ProjectReference Include="..\..\..\FastReport.Forms.WPF\src\FastReport.Forms.WPF.csproj" Condition="$(DebugFRForms)">
+      <PrivateAssets>compile</PrivateAssets>
+    </ProjectReference>
+  </ItemGroup>
+  
+  <ItemGroup Condition="'$(Configuration)' == 'Demo'">
+    <PackageReference Include="FastReport.Forms.WPF.Demo" Version="$(FRFormsWPFVersion)">
+      <PrivateAssets>compile</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+  
+</Project>
