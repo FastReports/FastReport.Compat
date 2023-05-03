@@ -14,7 +14,6 @@
 
   <PropertyGroup Condition="'$(Configuration)' == 'Demo'">
     <DefineConstants>$(DefineConstants);Demo</DefineConstants>
-    <PackageId>FastReport.Compat.WPF.Demo</PackageId>
   </PropertyGroup>
 
   <Import Project="$(SlnDir)\UsedPackages.version" />
@@ -30,19 +29,13 @@
     <Compile Remove="$(SourceCode)\DotNetClasses\UITypeEditor.cs" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(Configuration)' != 'Demo'">
+  <ItemGroup>
     <PackageReference Include="FastReport.Forms.WPF" Version="$(FRFormsWPFVersion)" Condition="!$(DebugFRForms)">
       <PrivateAssets>compile</PrivateAssets>
     </PackageReference>
     <ProjectReference Include="..\..\..\FastReport.Forms.WPF\src\FastReport.Forms.WPF.csproj" Condition="$(DebugFRForms)">
       <PrivateAssets>compile</PrivateAssets>
     </ProjectReference>
-  </ItemGroup>
-  
-  <ItemGroup Condition="'$(Configuration)' == 'Demo'">
-    <PackageReference Include="FastReport.Forms.WPF.Demo" Version="$(FRFormsWPFVersion)">
-      <PrivateAssets>compile</PrivateAssets>
-    </PackageReference>
   </ItemGroup>
   
 </Project>
