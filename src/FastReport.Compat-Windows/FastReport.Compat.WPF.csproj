@@ -9,11 +9,15 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
-    <DebugFRForms>true</DebugFRForms>
+    <FastReportFormsWPF>FastReport.Forms.WPF</FastReportFormsWPF>
+
+    <UseFRSources>true</UseFRSources>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Demo'">
     <DefineConstants>$(DefineConstants);Demo</DefineConstants>
+    <PackageId>FastReport.Compat.WPF.Demo</PackageId>
+    <FastReportFormsWPF>FastReport.Forms.WPF.Demo</FastReportFormsWPF>
   </PropertyGroup>
 
   <Import Project="$(SlnDir)\UsedPackages.version" />
@@ -28,14 +32,16 @@
     <Compile Remove="$(SourceCode)\WindowsForms\**\*.cs" />
     <Compile Remove="$(SourceCode)\DotNetClasses\UITypeEditor.cs" />
   </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="FastReport.Forms.WPF" Version="$(FRFormsWPFVersion)" Condition="!$(DebugFRForms)">
-      <PrivateAssets>compile</PrivateAssets>
-    </PackageReference>
-    <ProjectReference Include="..\..\..\FastReport.Forms.WPF\src\FastReport.Forms.WPF.csproj" Condition="$(DebugFRForms)">
+  
+  <ItemGroup Condition="$(UseFRSources)">
+    <ProjectReference Include="..\..\..\FastReport.Forms.WPF\src\FastReport.Forms.WPF.csproj">
       <PrivateAssets>compile</PrivateAssets>
     </ProjectReference>
   </ItemGroup>
-  
+
+  <ItemGroup Condition="!$(UseFRSources)">
+    <PackageReference Include="$(FastReportFormsWPF)" Version="$(FRFormsWPFVersion)">
+      <PrivateAssets>compile</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
 </Project>
