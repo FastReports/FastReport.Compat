@@ -699,34 +699,34 @@ namespace System.Windows.Forms
 
     public static class Cursors
     {
-        public static Cursor AppStarting => new Cursor();
-        public static Cursor PanSW => new Cursor();
-        public static Cursor PanSouth => new Cursor();
-        public static Cursor PanSE => new Cursor();
-        public static Cursor PanNW => new Cursor();
-        public static Cursor PanNorth => new Cursor();
-        public static Cursor PanNE => new Cursor();
-        public static Cursor PanEast => new Cursor();
-        public static Cursor NoMoveVert => new Cursor();
-        public static Cursor NoMoveHoriz => new Cursor();
-        public static Cursor NoMove2D => new Cursor();
-        public static Cursor VSplit => new Cursor();
-        public static Cursor HSplit => new Cursor();
-        public static Cursor Help => new Cursor();
-        public static Cursor WaitCursor => new Cursor();
-        public static Cursor UpArrow => new Cursor();
-        public static Cursor SizeWE => new Cursor();
-        public static Cursor SizeNWSE => new Cursor();
-        public static Cursor SizeNS => new Cursor();
-        public static Cursor SizeNESW => new Cursor();
-        public static Cursor SizeAll => new Cursor();
-        public static Cursor No => new Cursor();
-        public static Cursor IBeam => new Cursor();
-        public static Cursor Default => new Cursor();
-        public static Cursor Cross => new Cursor();
-        public static Cursor Arrow => new Cursor();
-        public static Cursor PanWest => new Cursor();
-        public static Cursor Hand => new Cursor();
+        public static Cursor AppStarting = new Cursor();
+        public static Cursor PanSW = new Cursor();
+        public static Cursor PanSouth = new Cursor();
+        public static Cursor PanSE = new Cursor();
+        public static Cursor PanNW = new Cursor();
+        public static Cursor PanNorth = new Cursor();
+        public static Cursor PanNE = new Cursor();
+        public static Cursor PanEast = new Cursor();
+        public static Cursor NoMoveVert = new Cursor();
+        public static Cursor NoMoveHoriz = new Cursor();
+        public static Cursor NoMove2D = new Cursor();
+        public static Cursor VSplit = new Cursor();
+        public static Cursor HSplit = new Cursor();
+        public static Cursor Help = new Cursor();
+        public static Cursor WaitCursor = new Cursor();
+        public static Cursor UpArrow = new Cursor();
+        public static Cursor SizeWE = new Cursor();
+        public static Cursor SizeNWSE = new Cursor();
+        public static Cursor SizeNS = new Cursor();
+        public static Cursor SizeNESW = new Cursor();
+        public static Cursor SizeAll = new Cursor();
+        public static Cursor No = new Cursor();
+        public static Cursor IBeam = new Cursor();
+        public static Cursor Default = new Cursor();
+        public static Cursor Cross = new Cursor();
+        public static Cursor Arrow = new Cursor();
+        public static Cursor PanWest = new Cursor();
+        public static Cursor Hand = new Cursor();
     }
 
     public class Control : Component
