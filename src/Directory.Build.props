@@ -22,8 +22,9 @@
     <SourceCode>$(MSBuildThisFileDirectory)shared</SourceCode>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+  <PropertyGroup Condition="'$(Configuration)'!='Debug'">
     <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
     <DebugSymbols>false</DebugSymbols>
     <BuildProjectReferences>false</BuildProjectReferences>
     <GenerateDependencyFile>false</GenerateDependencyFile>
