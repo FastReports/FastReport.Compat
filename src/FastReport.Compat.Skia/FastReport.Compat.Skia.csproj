@@ -12,6 +12,11 @@
     <DebugFRDrawing>false</DebugFRDrawing>
 
     <Description>Common compatible types for FastReport.Core with Skia</Description>
+    <Configurations>Debug;Release;Demo</Configurations>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Demo'">
+    <PackageId>$(PackageId).Demo</PackageId>
   </PropertyGroup>
 
   <!--<PropertyGroup Condition="$(TargetFramework)=='net6.0'">
@@ -19,8 +24,9 @@
   </PropertyGroup>-->
 
   <Import Project="$(SlnDir)\UsedPackages.version" />
-  <ItemGroup>
-    <PackageReference Include="FastReport.SkiaDrawing" Version="$(FastReportSkiaDrawingVersion)" Condition="!$(DebugFRDrawing)" />
+  <ItemGroup Condition="!$(DebugFRDrawing)">
+    <PackageReference Include="FastReport.SkiaDrawing" Version="$(FastReportSkiaDrawingVersion)" Condition="$(Configuration) != 'Demo'" />
+    <PackageReference Include="FastReport.SkiaDrawing.Demo" Version="$(FastReportSkiaDrawingVersion)" Condition="$(Configuration) == 'Demo'" />
   </ItemGroup>
 
   <ItemGroup>
