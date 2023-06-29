@@ -11,7 +11,9 @@
 
     <FastReportFormsWPF>FastReport.Forms.WPF</FastReportFormsWPF>
 
-    <UseFRSources>true</UseFRSources>
+    <FastReportFormsWPFProj>..\..\..\FastReport.Forms.WPF\src\FastReport.Forms.WPF.csproj</FastReportFormsWPFProj>
+    <UseFRSources>false</UseFRSources>
+    <UseFRSources Condition="Exists('$(FastReportFormsWPFProj)')">true</UseFRSources>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Demo'">
@@ -33,8 +35,8 @@
     <Compile Remove="$(SourceCode)\DotNetClasses\UITypeEditor.cs" />
   </ItemGroup>
   
-  <ItemGroup Condition="$(UseFRSources)">
-    <ProjectReference Include="..\..\..\FastReport.Forms.WPF\src\FastReport.Forms.WPF.csproj">
+  <ItemGroup Condition="$(UseFRSources) == 'true'">
+    <ProjectReference Include="$(FastReportFormsWPFProj)">
       <PrivateAssets>compile</PrivateAssets>
     </ProjectReference>
   </ItemGroup>
