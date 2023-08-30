@@ -786,7 +786,24 @@ namespace FastReport.Code.CodeDom.Compiler
                     if (d.Severity > DiagnosticSeverity.Hidden)
                         DebugMessage($"Compiler {d.Severity}: {d.GetMessage()}. Line: {d.Location}");
 #endif
-                var compiledAssembly = Assembly.Load(ms.ToArray());
+
+                ms.Position = 0;
+                Assembly compiledAssembly = null;
+
+#if NETCOREAPP
+                foreach (var assemblyLoadContext in AssemblyLoadContext.All)
+                {
+                    if (assemblyLoadContext.Assemblies.Any(assembly => assembly == typeof(CodeDomProvider).Assembly))
+                    {
+                        compiledAssembly = assemblyLoadContext.LoadFromStream(ms);
+                    }
+                }
+
+                if (compiledAssembly == null)
+                    compiledAssembly = AssemblyLoadContext.Default.LoadFromStream(ms);
+#else
+                compiledAssembly = Assembly.Load(ms.ToArray());
+#endif
                 return new CompilerResults(compiledAssembly);
             }
             else
