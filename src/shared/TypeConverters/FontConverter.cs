@@ -6,6 +6,7 @@
 // - code changed to support .Net 2.0
 // - PrivateFontCollection property added
 // - Instance property added
+// - Up priority of PrivateFontCollection
 
 using System;
 using System.Collections;
@@ -22,7 +23,7 @@ namespace FastReport.TypeConverters
     public class FontConverter : TypeConverter
     {
         private const string StylePrefix = "style=";
-        private static readonly object fontCollectionLocker = new object();
+
 
         [Obsolete]
         public static FontConverter Instance = new FontConverter();
@@ -30,10 +31,9 @@ namespace FastReport.TypeConverters
         /// <summary>
         /// Gets a PrivateFontCollection instance.
         /// </summary>
-        public static PrivateFontCollection PrivateFontCollection
-        {
-            get;
-        } = new PrivateFontCollection();
+        public static PrivateFontCollection PrivateFontCollection { get; } = new PrivateFontCollection();
+
+        public static InstalledFontCollection InstalledFontCollection { get; } = new InstalledFontCollection();
 
         /// <inheritdoc/>
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
@@ -235,22 +235,9 @@ namespace FastReport.TypeConverters
                 }
             }
 
-            Font result = new Font(fontName, fontSize, fontStyle, units);
-            if (result.Name != fontName)
-            {
-                // font family not found in installed fonts, search in the user fonts
-                lock(fontCollectionLocker)
-                {
-                    foreach (FontFamily f in PrivateFontCollection.Families)
-                    {
-                        if (String.Compare(fontName, f.Name, true) == 0)
-                        {
-                            result = new Font(f, fontSize, fontStyle, units);
-                            break;
-                        }
-                    }
-                }
-            }
+            var fontFamily = FontFontFamily(fontName, null);
+
+            Font result = new Font(fontFamily, fontSize, fontStyle, units);
 
             return result;
         }
@@ -293,14 +280,14 @@ namespace FastReport.TypeConverters
 
         private GraphicsUnit ParseGraphicsUnits(string units)
         {
-             if (units == "display") return GraphicsUnit.Display;
-             else if (units == "doc") return GraphicsUnit.Document;
-             else if (units == "pt") return GraphicsUnit.Point;
-             else if (units == "in") return GraphicsUnit.Inch;
-             else if (units == "mm") return GraphicsUnit.Millimeter;
-             else if (units == "px") return GraphicsUnit.Pixel;
-             else if (units == "world") return GraphicsUnit.World;
-             else throw new ArgumentException("Invalid font units: " + units);
+            if (units == "display") return GraphicsUnit.Display;
+            else if (units == "doc") return GraphicsUnit.Document;
+            else if (units == "pt") return GraphicsUnit.Point;
+            else if (units == "in") return GraphicsUnit.Inch;
+            else if (units == "mm") return GraphicsUnit.Millimeter;
+            else if (units == "px") return GraphicsUnit.Pixel;
+            else if (units == "world") return GraphicsUnit.World;
+            else throw new ArgumentException("Invalid font units: " + units);
         }
 
         /// <inheritdoc/>
@@ -360,9 +347,45 @@ namespace FastReport.TypeConverters
             }
             else
             {
-                FontCollection collection = new InstalledFontCollection();
-                FontFamily[] installedFontList = collection.Families;
-                foreach (FontFamily font in installedFontList)
+                fontFamily = FontFontFamily(name, fontFamily);
+            }
+
+            return new Font(fontFamily, size, style, unit, charSet, vertical);
+        }
+
+        private static FontFamily FontFontFamily(string name, FontFamily fontFamily)
+        {
+#if SKIA
+
+                FontCollection collection = PrivateFontCollection;
+                fontFamily = collection.FindInternalByGDIFontFamilyName(name);
+                if(fontFamily  == null)
+                {
+                    collection = InstalledFontCollection;
+                    fontFamily = collection.FindInternalByGDIFontFamilyName(name);
+                }
+
+
+#else
+            FontCollection collection = PrivateFontCollection;
+
+
+
+            foreach (FontFamily font in collection.Families)
+            {
+                if (name.Equals(font.Name, StringComparison.OrdinalIgnoreCase))
+                {
+                    fontFamily = font;
+                    break;
+                }
+            }
+
+            // font family not found in private list
+            if (fontFamily == null)
+            {
+                collection = InstalledFontCollection;
+                FontFamily[] privateFontList = collection.Families;
+                foreach (FontFamily font in privateFontList)
                 {
                     if (name.Equals(font.Name, StringComparison.OrdinalIgnoreCase))
                     {
@@ -370,34 +393,19 @@ namespace FastReport.TypeConverters
                         break;
                     }
                 }
-
-                // font family not found in installed fonts
-                if (fontFamily == null)
-                {
-                    collection = PrivateFontCollection;
-                    FontFamily[] privateFontList = collection.Families;
-                    foreach (FontFamily font in privateFontList)
-                    {
-                        if (name.Equals(font.Name, StringComparison.OrdinalIgnoreCase))
-                        {
-                            fontFamily = font;
-                            break;
-                        }
-                    }
-                }
-
-                // font family not found in private fonts also
-                if (fontFamily == null)
-                    fontFamily = FontFamily.GenericSansSerif;
             }
+#endif
 
-            return new Font(fontFamily, size, style, unit, charSet, vertical);
+            // font family not found in private fonts also
+            if (fontFamily == null)
+                fontFamily = FontFamily.GenericSansSerif;
+            return fontFamily;
         }
 
         /// <inheritdoc/>
         public override bool GetCreateInstanceSupported(ITypeDescriptorContext context)
         {
-          return true;
+            return true;
         }
 
         /// <inheritdoc/>
@@ -412,7 +420,7 @@ namespace FastReport.TypeConverters
         /// <inheritdoc/>
         public override bool GetPropertiesSupported(ITypeDescriptorContext context)
         {
-          return true;
+            return true;
         }
 
         public sealed class FontNameConverter : TypeConverter, IDisposable
