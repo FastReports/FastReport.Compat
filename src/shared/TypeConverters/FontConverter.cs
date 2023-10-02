@@ -31,7 +31,18 @@ namespace FastReport.TypeConverters
         /// <summary>
         /// Gets a PrivateFontCollection instance.
         /// </summary>
+        /// <remarks>
+        /// NOT THREAD SAFE!
+        /// </remarks>
         public static PrivateFontCollection PrivateFontCollection { get; } = new PrivateFontCollection();
+
+        /// <summary>
+        /// Do not update PrivateFontCollection at realtime, you must update property value then dispose previous.
+        /// </summary>
+        /// <remarks>
+        /// NOT THREAD SAFE!
+        /// </remarks>
+        public static PrivateFontCollection TemporaryFontCollection { get; set; } = null;
 
         public static InstalledFontCollection InstalledFontCollection { get; } = new InstalledFontCollection();
 
@@ -235,7 +246,7 @@ namespace FastReport.TypeConverters
                 }
             }
 
-            var fontFamily = FontFontFamily(fontName, null);
+            var fontFamily = FindFontFamily(fontName, null);
 
             Font result = new Font(fontFamily, fontSize, fontStyle, units);
 
@@ -347,53 +358,72 @@ namespace FastReport.TypeConverters
             }
             else
             {
-                fontFamily = FontFontFamily(name, fontFamily);
+                fontFamily = FindFontFamily(name, fontFamily);
             }
 
             return new Font(fontFamily, size, style, unit, charSet, vertical);
         }
 
-        private static FontFamily FontFontFamily(string name, FontFamily fontFamily)
+        private static FontFamily FindFontFamily(string name, FontFamily fontFamily)
         {
-#if SKIA
+            FontCollection collection;
 
-                FontCollection collection = PrivateFontCollection;
+#if SKIA
+            collection = TemporaryFontCollection;
+
+            if (collection != null)
+            {
                 fontFamily = collection.FindInternalByGDIFontFamilyName(name);
-                if(fontFamily  == null)
+            }
+
+            // font family not found in temp list
+            if (fontFamily == null)
+            {
+                collection = PrivateFontCollection;
+                fontFamily = collection.FindInternalByGDIFontFamilyName(name);
+
+                // font family not found in private list
+                if (fontFamily == null)
                 {
                     collection = InstalledFontCollection;
                     fontFamily = collection.FindInternalByGDIFontFamilyName(name);
                 }
-
-
+            }
 #else
-            FontCollection collection = PrivateFontCollection;
+            collection = TemporaryFontCollection;
 
+            if (collection != null)
+            {
+                foreach (FontFamily font in collection.Families)
+                {
+                    if (name.Equals(font.Name, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return font;
+                    }
+                }
+            }
 
-
+            // font family not found in temp list
+            collection = PrivateFontCollection;
             foreach (FontFamily font in collection.Families)
             {
                 if (name.Equals(font.Name, StringComparison.OrdinalIgnoreCase))
                 {
-                    fontFamily = font;
-                    break;
+                    return font;
                 }
             }
 
             // font family not found in private list
-            if (fontFamily == null)
+            collection = InstalledFontCollection;
+            FontFamily[] privateFontList = collection.Families;
+            foreach (FontFamily font in privateFontList)
             {
-                collection = InstalledFontCollection;
-                FontFamily[] privateFontList = collection.Families;
-                foreach (FontFamily font in privateFontList)
+                if (name.Equals(font.Name, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (name.Equals(font.Name, StringComparison.OrdinalIgnoreCase))
-                    {
-                        fontFamily = font;
-                        break;
-                    }
+                    return font;
                 }
             }
+
 #endif
 
             // font family not found in private fonts also
