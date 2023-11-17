@@ -6,12 +6,13 @@
 
         <FRFormsWPFVersion Condition="$(FRFormsWPFVersion) == ''">2023.1.0</FRFormsWPFVersion>
 
+        <FRFormsAvaloniaVersion Condition="$(FRFormsAvaloniaVersion) == ''">2024.1.0</FRFormsAvaloniaVersion>
+
         <SystemDrawingCommonVersion>[4.7.0,)</SystemDrawingCommonVersion>
 
         <CodeAnalysisCSharpVersion>[3.3.1,)</CodeAnalysisCSharpVersion>
 
         <CodeAnalysisVisualBasicVersion>[3.3.1,)</CodeAnalysisVisualBasicVersion>
-		
     </PropertyGroup>
 	
 </Project>

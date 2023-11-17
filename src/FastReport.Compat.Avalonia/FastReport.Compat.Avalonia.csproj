@@ -1,0 +1,61 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net6.0</TargetFrameworks>
+    <UseWindowsForms>false</UseWindowsForms>
+    <UseWpf>false</UseWpf>
+    <DefineConstants>$(DefineConstants);NETCOREWIN;SKIA</DefineConstants>
+    <AssemblyName>FastReport.Compat</AssemblyName>
+    <PackageId>FastReport.Compat.Avalonia</PackageId>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+    <FastReportFormsAvalonia>FastReport.Forms.Avalonia</FastReportFormsAvalonia>
+    <FastReportFormsAvaloniaProj>..\..\..\FastReport.Forms.Avalonia\src\FastReport.Forms.Avalonia.csproj</FastReportFormsAvaloniaProj>
+    <FastReportSkiaDrawing>FastReport.SkiaDrawing</FastReportSkiaDrawing>
+    <FastReportSkiaDrawingProj>..\..\..\FastReport.SkiaDrawing\src\FastReport.SkiaDrawing.csproj</FastReportSkiaDrawingProj>
+    <UseFRSources>false</UseFRSources>
+    <UseFRSources Condition="Exists('$(FastReportFormsAvaloniaProj)') and Exists('$(FastReportSkiaDrawingProj)')">true</UseFRSources>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Demo'">
+    <DefineConstants>$(DefineConstants);Demo</DefineConstants>
+    <PackageId>FastReport.Compat.Avalonia.Demo</PackageId>
+    <FastReportFormsAvalonia>FastReport.Forms.Avalonia.Demo</FastReportFormsAvalonia>
+  </PropertyGroup>
+
+  <Import Project="$(SlnDir)\UsedPackages.version" />
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="[3.8.0,)" /> <!-- this is the version also used in Avalonia -->
+    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="[3.8.0,)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="$(SourceCode)\WindowsForms\**\*.cs" />
+    <Compile Remove="$(SourceCode)\DotNetClasses\UITypeEditor.cs" />
+  </ItemGroup>
+  
+  <ItemGroup Condition="$(UseFRSources) == 'true'">
+    <ProjectReference Include="$(FastReportFormsAvaloniaProj)">
+      <PrivateAssets>compile</PrivateAssets>
+    </ProjectReference>
+    <ProjectReference Include="$(FastReportSkiaDrawingProj)"/>
+  </ItemGroup>
+
+  <ItemGroup Condition="!$(UseFRSources)">
+    <PackageReference Include="$(FastReportFormsAvalonia)" Version="$(FRFormsAvaloniaVersion)">
+      <PrivateAssets>compile</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="$(FastReportSkiaDrawing)" Version="$(FastReportSkiaDrawingVersion)"/>
+  </ItemGroup>
+
+  <!-- disable transitive reference to System.Drawing.Common (used in Avalonia.Win32). PrivateAssets does not work in this case -->
+  <Target Name="ProcessSDCAssemblies" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">
+    <ItemGroup>
+      <ReferencePath Condition="'%(FileName)' == 'System.Drawing.Common'">
+        <Aliases>nonmerged</Aliases>
+      </ReferencePath>
+    </ItemGroup>
+  </Target>
+</Project>
