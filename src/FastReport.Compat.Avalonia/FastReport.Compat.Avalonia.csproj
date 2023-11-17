@@ -2,8 +2,6 @@
 
   <PropertyGroup>
     <TargetFrameworks>net6.0</TargetFrameworks>
-    <UseWindowsForms>false</UseWindowsForms>
-    <UseWpf>false</UseWpf>
     <DefineConstants>$(DefineConstants);NETCOREWIN;SKIA</DefineConstants>
     <AssemblyName>FastReport.Compat</AssemblyName>
     <PackageId>FastReport.Compat.Avalonia</PackageId>
