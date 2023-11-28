@@ -2,9 +2,9 @@
 <Project>
 <!-- This group sets version used packages in FastReport.Compat and package -->
     <PropertyGroup>
-        <FastReportSkiaDrawingVersion Condition="$(FastReportSkiaDrawingVersion) == ''">2023.3.1</FastReportSkiaDrawingVersion>
+        <FastReportSkiaDrawingVersion Condition="$(FastReportSkiaDrawingVersion) == ''">2024.1.0</FastReportSkiaDrawingVersion>
 
-        <FRFormsWPFVersion Condition="$(FRFormsWPFVersion) == ''">2023.1.0</FRFormsWPFVersion>
+        <FRFormsWPFVersion Condition="$(FRFormsWPFVersion) == ''">2024.1.0</FRFormsWPFVersion>
 
         <SystemDrawingCommonVersion>[4.7.0,)</SystemDrawingCommonVersion>
 
