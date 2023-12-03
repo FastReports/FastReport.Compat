@@ -28,23 +28,18 @@ namespace FastReport.TypeConverters
         [Obsolete]
         public static FontConverter Instance = new FontConverter();
 
-        /// <summary>
-        /// Gets a PrivateFontCollection instance.
-        /// </summary>
-        /// <remarks>
-        /// NOT THREAD SAFE!
-        /// </remarks>
-        public static PrivateFontCollection PrivateFontCollection { get; } = new PrivateFontCollection();
+        [Obsolete("Use FontManager instead")]
+        public static PrivateFontCollection PrivateFontCollection => FontManager.PrivateFontCollection;
 
-        /// <summary>
-        /// Do not update PrivateFontCollection at realtime, you must update property value then dispose previous.
-        /// </summary>
-        /// <remarks>
-        /// NOT THREAD SAFE!
-        /// </remarks>
-        public static PrivateFontCollection TemporaryFontCollection { get; set; } = null;
+        [Obsolete("Use FontManager instead")]
+        public static PrivateFontCollection TemporaryFontCollection 
+        { 
+            get => FontManager.TemporaryFontCollection;
+            set => FontManager.TemporaryFontCollection = value;
+        }
 
-        public static InstalledFontCollection InstalledFontCollection { get; } = new InstalledFontCollection();
+        [Obsolete("Use FontManager instead")]
+        public static InstalledFontCollection InstalledFontCollection => FontManager.InstalledFontCollection;
 
         /// <inheritdoc/>
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
@@ -246,11 +241,8 @@ namespace FastReport.TypeConverters
                 }
             }
 
-            var fontFamily = FindFontFamily(fontName, null);
-
-            Font result = new Font(fontFamily, fontSize, fontStyle, units);
-
-            return result;
+            var fontFamily = FontManager.GetFontFamilyOrDefault(fontName);
+            return new Font(fontFamily, fontSize, fontStyle, units);
         }
 
         private void ParseSizeTokens(string text, char separator, ref string size, ref string units)
@@ -358,78 +350,10 @@ namespace FastReport.TypeConverters
             }
             else
             {
-                fontFamily = FindFontFamily(name, fontFamily);
+                fontFamily = FontManager.GetFontFamilyOrDefault(name);
             }
 
             return new Font(fontFamily, size, style, unit, charSet, vertical);
-        }
-
-        private static FontFamily FindFontFamily(string name, FontFamily fontFamily)
-        {
-            FontCollection collection;
-
-#if SKIA
-            collection = TemporaryFontCollection;
-
-            if (collection != null)
-            {
-                fontFamily = collection.FindInternalByGDIFontFamilyName(name);
-            }
-
-            // font family not found in temp list
-            if (fontFamily == null)
-            {
-                collection = PrivateFontCollection;
-                fontFamily = collection.FindInternalByGDIFontFamilyName(name);
-
-                // font family not found in private list
-                if (fontFamily == null)
-                {
-                    collection = InstalledFontCollection;
-                    fontFamily = collection.FindInternalByGDIFontFamilyName(name);
-                }
-            }
-#else
-            collection = TemporaryFontCollection;
-
-            if (collection != null)
-            {
-                foreach (FontFamily font in collection.Families)
-                {
-                    if (name.Equals(font.Name, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return font;
-                    }
-                }
-            }
-
-            // font family not found in temp list
-            collection = PrivateFontCollection;
-            foreach (FontFamily font in collection.Families)
-            {
-                if (name.Equals(font.Name, StringComparison.OrdinalIgnoreCase))
-                {
-                    return font;
-                }
-            }
-
-            // font family not found in private list
-            collection = InstalledFontCollection;
-            FontFamily[] privateFontList = collection.Families;
-            foreach (FontFamily font in privateFontList)
-            {
-                if (name.Equals(font.Name, StringComparison.OrdinalIgnoreCase))
-                {
-                    return font;
-                }
-            }
-
-#endif
-
-            // font family not found in private fonts also
-            if (fontFamily == null)
-                fontFamily = FontFamily.GenericSansSerif;
-            return fontFamily;
         }
 
         /// <inheritdoc/>

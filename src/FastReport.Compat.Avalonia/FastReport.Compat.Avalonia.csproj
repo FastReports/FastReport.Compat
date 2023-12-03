@@ -30,6 +30,7 @@
   <ItemGroup>
     <Compile Remove="$(SourceCode)\WindowsForms\**\*.cs" />
     <Compile Remove="$(SourceCode)\DotNetClasses\UITypeEditor.cs" />
+    <Compile Remove="$(SourceCode)\DotNetClasses\FontManager.cs" />
   </ItemGroup>
   
   <ItemGroup Condition="$(UseFRSources) == 'true'">
