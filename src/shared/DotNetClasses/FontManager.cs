@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Drawing;
 using System.Drawing.Text;
 
-namespace System.Drawing
+namespace FastReport
 {
-    public static class FontManager
+    public static partial class FontManager
     {
         /// <summary>
         /// Gets a PrivateFontCollection instance.
@@ -27,46 +28,14 @@ namespace System.Drawing
         /// </summary>
         public static InstalledFontCollection InstalledFontCollection { get; } = new InstalledFontCollection();
 
-        public static List<FontSubstitute> SubstituteFonts = new List<FontSubstitute>();
-
-        private static FontFamily FindFontFamilyInternal(string name)
-        {
-            FontCollection collection = TemporaryFontCollection;
-
-            if (collection != null)
-            {
-                foreach (FontFamily font in collection.Families)
-                {
-                    if (name.Equals(font.Name, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return font;
-                    }
-                }
-            }
-
-            // font family not found in temp list
-            collection = PrivateFontCollection;
-            foreach (FontFamily font in collection.Families)
-            {
-                if (name.Equals(font.Name, StringComparison.OrdinalIgnoreCase))
-                {
-                    return font;
-                }
-            }
-
-            // font family not found in private list
-            collection = InstalledFontCollection;
-            FontFamily[] privateFontList = collection.Families;
-            foreach (FontFamily font in privateFontList)
-            {
-                if (name.Equals(font.Name, StringComparison.OrdinalIgnoreCase))
-                {
-                    return font;
-                }
-            }
-
-            return null;
-        }
+        /// <summary>
+        /// Gets a list of substitute fonts.
+        /// </summary>
+        /// <remarks>
+        /// Substitute font replaces the original font if it is not present on a machine.
+        /// For example, you may define "Helvetica Neue" substitute for "Arial".
+        /// </remarks>
+        public static List<FontSubstitute> SubstituteFonts { get; } = new List<FontSubstitute>();
 
         /// <summary>
         /// Find a FontFamily by its name.

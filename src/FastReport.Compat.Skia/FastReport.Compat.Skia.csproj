@@ -43,6 +43,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="$(SourceCode)\DotNetClasses\FontManager.cs" />
+    <Compile Remove="$(SourceCode)\DotNetClasses\FontManager.Gdi.cs"/>
   </ItemGroup>
 </Project>

@@ -28,17 +28,17 @@ namespace FastReport.TypeConverters
         [Obsolete]
         public static FontConverter Instance = new FontConverter();
 
-        [Obsolete("Use FontManager instead")]
+        //[Obsolete("Use FontManager instead")]
         public static PrivateFontCollection PrivateFontCollection => FontManager.PrivateFontCollection;
 
-        [Obsolete("Use FontManager instead")]
+        //[Obsolete("Use FontManager instead")]
         public static PrivateFontCollection TemporaryFontCollection 
         { 
             get => FontManager.TemporaryFontCollection;
             set => FontManager.TemporaryFontCollection = value;
         }
 
-        [Obsolete("Use FontManager instead")]
+        //[Obsolete("Use FontManager instead")]
         public static InstalledFontCollection InstalledFontCollection => FontManager.InstalledFontCollection;
 
         /// <inheritdoc/>
