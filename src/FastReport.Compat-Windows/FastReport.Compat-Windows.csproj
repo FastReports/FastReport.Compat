@@ -41,7 +41,6 @@
   <ItemGroup>
     <Compile Remove="$(SourceCode)\WindowsForms\**\*.cs"/>
     <Compile Remove="$(SourceCode)\DotNetClasses\UITypeEditor.cs"/>
-    <Compile Remove="$(SourceCode)\DotNetClasses\FontManager.Skia.cs"/>
   </ItemGroup>
   
 </Project>

@@ -17,29 +17,14 @@ using System.Globalization;
 using System.Reflection;
 using System.Text;
 using System.Drawing;
+using System.Linq;
 
 namespace FastReport.TypeConverters
 {
-    public class FontConverter : TypeConverter
+    public partial class FontConverter : TypeConverter
     {
         private const string StylePrefix = "style=";
 
-
-        [Obsolete]
-        public static FontConverter Instance = new FontConverter();
-
-        //[Obsolete("Use FontManager instead")]
-        public static PrivateFontCollection PrivateFontCollection => FontManager.PrivateFontCollection;
-
-        //[Obsolete("Use FontManager instead")]
-        public static PrivateFontCollection TemporaryFontCollection 
-        { 
-            get => FontManager.TemporaryFontCollection;
-            set => FontManager.TemporaryFontCollection = value;
-        }
-
-        //[Obsolete("Use FontManager instead")]
-        public static InstalledFontCollection InstalledFontCollection => FontManager.InstalledFontCollection;
 
         /// <inheritdoc/>
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
@@ -241,7 +226,7 @@ namespace FastReport.TypeConverters
                 }
             }
 
-            var fontFamily = FontManager.GetFontFamilyOrDefault(fontName);
+            var fontFamily = FontFamilyMatcher.GetFontFamilyOrDefault(fontName);
             return new Font(fontFamily, fontSize, fontStyle, units);
         }
 
@@ -350,7 +335,7 @@ namespace FastReport.TypeConverters
             }
             else
             {
-                fontFamily = FontManager.GetFontFamilyOrDefault(name);
+                fontFamily = FontFamilyMatcher.GetFontFamilyOrDefault(name);
             }
 
             return new Font(fontFamily, size, style, unit, charSet, vertical);

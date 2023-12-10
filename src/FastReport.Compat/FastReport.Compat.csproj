@@ -20,7 +20,4 @@
     <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="$(CodeAnalysisVisualBasicVersion)" />
   </ItemGroup>
       
-  <ItemGroup>
-    <Compile Remove="$(SourceCode)\DotNetClasses\FontManager.Skia.cs"/>
-  </ItemGroup>
 </Project>

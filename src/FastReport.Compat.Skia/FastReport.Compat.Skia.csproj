@@ -41,8 +41,4 @@
   <ItemGroup Condition="$(DebugFRDrawing)">
     <ProjectReference Include="..\..\..\FastReport.SkiaDrawing\src\FastReport.SkiaDrawing.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="$(SourceCode)\DotNetClasses\FontManager.Gdi.cs"/>
-  </ItemGroup>
 </Project>
